@@ -71,10 +71,8 @@ function analyzeAudioFeatures() {
     let isBeat = false;
     const currentTime = Date.now();
     
-    // ИЗМЕНЕНО: Порог детектора битов снижен с 1.3 до 1.2 для большей чувствительности
     const threshold = energyAverage * 1.2 + 0.08; 
 
-    // ИЗМЕНЕНО: Задержка между битами уменьшена с 300ms до 200ms для реакции на быстрые биты
     if (rms > threshold && (currentTime - lastBeatTime) > 200) {
         isBeat = true;
         lastBeatTime = currentTime;
@@ -82,7 +80,6 @@ function analyzeAudioFeatures() {
     }
 
     if (currentPulseIntensity > 0) {
-        // ИЗМЕНЕНО: Скорость затухания увеличена с 0.05 до 0.07 для более резких "вспышек"
         currentPulseIntensity -= 0.07; 
     } else {
         currentPulseIntensity = 0;
@@ -98,13 +95,11 @@ function visualize() {
     const rightGlow = document.querySelector('.right-glow');
 
     if (leftGlow && rightGlow) {
-        // ИЗМЕНЕНО: Усилена базовая реакция на громкость (rms)
         let opacity = 0.4 + features.rms * 1.2;
         let blur = 10 + features.rms * 40;
         let spread = 20 + features.rms * 50;
 
         if (features.isBeat) {
-            // ИЗМЕНЕНО: Реакция на бит сделана ГОРАЗДО более мощной
             opacity = 1.0;
             blur = 40 + currentPulseIntensity * 35;
             spread = 55 + currentPulseIntensity * 45;
@@ -124,6 +119,7 @@ function visualize() {
 // --- КОНЕЦ БЛОКА АНАЛИЗА АУДИО ---
 
 function startValentine() {
+    // --- ССЫЛКИ НА ЭЛЕМЕНТЫ ---
     const audio = document.getElementById('player');
     const card = document.querySelector('.card');
     const image = document.querySelector('.card img');
@@ -132,6 +128,19 @@ function startValentine() {
     const ghostText = document.getElementById('ghost-text');
     const letterContainer = document.getElementById('letter-container');
     const visualizer = document.getElementById('beat-visualizer');
+    
+    // --- НОВЫЕ ССЫЛКИ НА ЭЛЕМЕНТЫ ПЛЕЕРА ---
+    const playerContainer = document.getElementById('player-container');
+    const playPauseBtn = document.getElementById('play-pause-btn');
+    const playIcon = document.getElementById('play-icon');
+    const pauseIcon = document.getElementById('pause-icon');
+    const progressBar = document.getElementById('progress-bar');
+    const currentTimeDisplay = document.getElementById('current-time');
+    const totalDurationDisplay = document.getElementById('total-duration');
+    const volumeBtn = document.getElementById('volume-btn');
+    const volumeIcon = document.getElementById('volume-icon');
+    const muteIcon = document.getElementById('mute-icon');
+    const volumeSlider = document.getElementById('volume-slider');
 
     card.classList.add('lyrics-mode');
     image.style.opacity = 0;
@@ -151,27 +160,39 @@ function startValentine() {
     audio.volume = 0;
     
     const playPromise = audio.play();
-    playPromise.catch(error => {
-        lyricsDisplay.textContent = "Нажми, чтобы начать ♡";
-        document.body.addEventListener('click', () => { 
-            audio.play();
-        }, { once: true });
-    });
+    if (playPromise !== undefined) {
+        playPromise.catch(error => {
+            lyricsDisplay.textContent = "Нажми, чтобы начать ♡";
+            document.body.addEventListener('click', () => { 
+                audio.play();
+            }, { once: true });
+        });
+    }
 
     audio.addEventListener('play', () => {
         initAudioAnalyzer(audio);
         if (!animationId) {
             visualize();
         }
+        updatePlayButton(); // Обновляем иконку
     }, { once: true });
     
+    audio.addEventListener('pause', updatePlayButton); // Обновляем иконку при паузе
+
     let fadeInInterval = setInterval(() => {
-        if (audio.volume < 0.7) { audio.volume = Math.min(0.7, audio.volume + 0.07); } 
+        if (audio.volume < 0.7) { 
+            const newVolume = Math.min(0.7, audio.volume + 0.07);
+            audio.volume = newVolume;
+            volumeSlider.value = newVolume; // Синхронизируем слайдер
+        } 
         else { clearInterval(fadeInInterval); }
     }, 100);
 
     let currentEventIndex = 0;
     audio.addEventListener('timeupdate', function() {
+        // Синхронизация прогресс-бара
+        updateProgress();
+
         if (currentEventIndex >= events.length) return;
         if (audio.currentTime >= events[currentEventIndex].time) {
             const currentEvent = events[currentEventIndex];
@@ -195,13 +216,88 @@ function startValentine() {
             currentEventIndex++;
         }
     });
+
+    // --- НОВЫЙ БЛОК: ЛОГИКА ПЛЕЕРА ---
+
+    function formatTime(seconds) {
+        const minutes = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
+    }
+
+    function updatePlayButton() {
+        if (audio.paused) {
+            playIcon.style.display = 'block';
+            pauseIcon.style.display = 'none';
+        } else {
+            playIcon.style.display = 'none';
+            pauseIcon.style.display = 'block';
+        }
+    }
+
+    function updateVolumeIcon() {
+        if (audio.muted || audio.volume === 0) {
+            volumeIcon.style.display = 'none';
+            muteIcon.style.display = 'block';
+        } else {
+            volumeIcon.style.display = 'block';
+            muteIcon.style.display = 'none';
+        }
+    }
+
+    function updateProgress() {
+        progressBar.value = audio.currentTime;
+        currentTimeDisplay.textContent = formatTime(audio.currentTime);
+    }
+    
+    audio.addEventListener('loadedmetadata', () => {
+        progressBar.max = audio.duration;
+        totalDurationDisplay.textContent = formatTime(audio.duration);
+    });
+    
+    playPauseBtn.addEventListener('click', () => {
+        if (audio.paused) {
+            audio.play();
+        } else {
+            audio.pause();
+        }
+    });
+    
+    progressBar.addEventListener('input', () => {
+        audio.currentTime = progressBar.value;
+    });
+
+    volumeSlider.addEventListener('input', () => {
+        audio.muted = false;
+        audio.volume = volumeSlider.value;
+        updateVolumeIcon();
+    });
+
+    volumeBtn.addEventListener('click', () => {
+        audio.muted = !audio.muted;
+        volumeSlider.value = audio.muted ? 0 : audio.volume;
+        updateVolumeIcon();
+    });
+    
+    audio.addEventListener('volumechange', () => {
+        if (!audio.muted) {
+            volumeSlider.value = audio.volume;
+        }
+        updateVolumeIcon();
+    });
+
+    // --- КОНЕЦ ЛОГИКИ ПЛЕЕРА ---
     
     function displayLetter() {
         lyricsDisplay.style.opacity = 0;
         ghostText.style.opacity = 0;
 
         let volumeInterval = setInterval(() => {
-            if (audio.volume < 1.0) { audio.volume = Math.min(1.0, audio.volume + 0.05); } 
+            if (audio.volume < 1.0) { 
+                const newVolume = Math.min(1.0, audio.volume + 0.05);
+                audio.volume = newVolume;
+                volumeSlider.value = newVolume; // Синхронизируем слайдер
+            } 
             else { clearInterval(volumeInterval); }
         }, 50);
 
@@ -209,12 +305,15 @@ function startValentine() {
             lyricsContainer.style.display = 'none';
             card.classList.remove('lyrics-mode');
             image.style.display = 'block';
-            letterContainer.style.display = 'block';
             
+            // Показываем плеер и письмо
+            playerContainer.style.display = 'block';
+            letterContainer.style.display = 'block';
             visualizer.classList.add('visible');
 
             setTimeout(() => {
                 image.style.opacity = 1;
+                playerContainer.style.opacity = 1; // Плавное появление плеера
                 letterContainer.style.opacity = 1;
                 
                 const letterP = letterContainer.querySelector('p');
