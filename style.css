@@ -39,21 +39,6 @@ body {
     box-shadow: none;
 }
 
-/* --- НОВОЕ: Анимация пульсации для визуализатора --- */
-@keyframes pulseGlow {
-    0%, 100% {
-        box-shadow: 0 0 30px rgba(220, 20, 60, 0.5);
-    }
-    50% {
-        box-shadow: 0 0 55px rgba(220, 20, 60, 0.85);
-    }
-}
-
-.card.pulsing {
-    animation: pulseGlow 1.6s infinite ease-in-out;
-}
-
-
 /* --- Стили для страницы входа --- */
 .login-container h1 { color: #f0f0f0; font-size: 1.8em; margin-bottom: 25px; }
 .notification { background-color: #2b2b2b; border: 1px solid #dc143c; padding: 15px; border-radius: 10px; margin-bottom: 25px; color: #f0f0f0; }
@@ -122,7 +107,7 @@ button:hover { background-color: white; color: #dc143c; }
 #letter-container h2 { color: #f0f0f0; text-align: center; margin-bottom: 20px; font-weight: 700; }
 #letter-container p { color: #ccc; line-height: 1.7; font-size: 1.1em; font-weight: 400; }
 
-/* --- НОВОЕ: Стили для эффекта печатной машинки --- */
+/* --- Стили для эффекта печатной машинки --- */
 #letter-container p::after {
     content: '▋';
     animation: blink 1s step-end infinite;
@@ -138,4 +123,70 @@ button:hover { background-color: white; color: #dc143c; }
 #letter-container p.finished-typing::after {
     content: '';
     animation: none;
+}
+
+/* --- СТИЛИ ДЛЯ МУЗЫКАЛЬНОГО ВИЗУАЛИЗАТОРА --- */
+#beat-visualizer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 5; /* Ниже чем текст, но выше фона */
+    pointer-events: none; /* Чтобы не мешали кликать */
+    display: none; /* По умолчанию скрыт */
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+}
+
+#beat-visualizer.visible {
+    display: block;
+    opacity: 1;
+}
+
+.beat-bar {
+    position: absolute;
+    top: 0;
+    width: 150px; /* Ширина свечения */
+    height: 100%;
+    
+    background: radial-gradient(ellipse at center, 
+        rgba(220, 20, 60, 0.4) 0%, 
+        rgba(220, 20, 60, 0) 70%
+    );
+    
+    /* !!! ЗАМЕНИТЕ 0.428s НА ВАШЕ ЗНАЧЕНИЕ (60 / BPM песни) !!! */
+    /* Пример для 140 BPM: 60 / 140 = 0.428s */
+    animation: beatGlow 0.428s infinite ease-in-out;
+    opacity: 0;
+}
+
+.beat-bar.left {
+    left: 0;
+    transform: translateX(-50%);
+}
+
+.beat-bar.right {
+    right: 0;
+    transform: translateX(50%);
+}
+
+@keyframes beatGlow {
+    0%, 100% {
+        opacity: 0;
+        transform: scaleY(1) translateX(-50%);
+    }
+    50% {
+        opacity: 1;
+        transform: scaleY(1.1) translateX(-50%);
+    }
+
+    .right & {
+        0%, 100% {
+            transform: scaleY(1) translateX(50%);
+        }
+        50% {
+            transform: scaleY(1.1) translateX(50%);
+        }
+    }
 }
