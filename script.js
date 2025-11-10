@@ -33,8 +33,6 @@ function startValentine() {
     const lyricsContainer = document.getElementById('lyrics-container');
     const lyricsDisplay = document.getElementById('lyrics');
     const ghostText = document.getElementById('ghost-text');
-    
-    // !!! ИСПРАВЛЕНО: ВОТ ЭТА СТРОКА БЫЛА СЛУЧАЙНО УДАЛЕНА !!!
     const letterContainer = document.getElementById('letter-container');
 
     card.classList.add('lyrics-mode');
@@ -42,11 +40,14 @@ function startValentine() {
     image.style.display = 'none';
     audio.currentTime = 23;
 
+    // ИЗМЕНЕНО: Полностью переработанная временная шкала событий
     const events = [
-        { time: 23, text: "И я подонок, я изменщик,\nя gaslighter и абьюзер", type: 'lyric' },
-        { time: 27, text: "Я не нравлюсь твоей маме,\nда и хуй с ней", type: 'lyric', ghost: "(ну допустим)" },
-        { time: 31, text: "Детка, хватит мне уже давать\nпоследний шанс", type: 'lyric', ghost: "(ага)"},
-        { time: 35, text: "Счастье — это не для нас", type: 'lyric' },
+        { time: 23, type: 'lyric', text: "И я подонок, я изменщик,\nя gaslighter и абьюзер" },
+        { time: 27, type: 'lyric', text: "Я не нравлюсь твоей маме,\nда и хуй с ней" },
+        { time: 30, type: 'ghost', text: "(ну допустим)" },
+        { time: 31, type: 'lyric', text: "Детка, хватит мне уже давать\nпоследний шанс" },
+        { time: 34.5, type: 'ghost', text: "(ага)" }, // Появляется чуть раньше для эффекта
+        { time: 35, type: 'lyric', text: "Счастье — это не для нас" },
         { time: 38.5, type: 'showLetter' }
     ];
 
@@ -57,11 +58,8 @@ function startValentine() {
     });
 
     let fadeInInterval = setInterval(() => {
-        if (audio.volume < 0.7) {
-            audio.volume = Math.min(0.7, audio.volume + 0.07);
-        } else {
-            clearInterval(fadeInInterval);
-        }
+        if (audio.volume < 0.7) { audio.volume = Math.min(0.7, audio.volume + 0.07); } 
+        else { clearInterval(fadeInInterval); }
     }, 100);
 
     let currentEventIndex = 0;
@@ -69,18 +67,18 @@ function startValentine() {
         if (currentEventIndex >= events.length) return;
         if (audio.currentTime >= events[currentEventIndex].time) {
             const currentEvent = events[currentEventIndex];
+
+            // ИЗМЕНЕНО: Новая логика для управления текстами
             if (currentEvent.type === 'lyric') {
-                lyricsDisplay.style.opacity = 0;
-                ghostText.style.opacity = 0;
-                setTimeout(() => {
-                    lyricsDisplay.innerText = currentEvent.text;
-                    lyricsDisplay.style.opacity = 1;
-                    if (currentEvent.ghost) {
-                        ghostText.innerText = currentEvent.ghost;
-                        ghostText.style.opacity = 1;
-                    }
-                }, 200);
+                ghostText.style.opacity = 0; // Прячем призрак
+                lyricsDisplay.innerText = currentEvent.text;
+                lyricsDisplay.style.opacity = 1; // Показываем основной текст
             } 
+            else if (currentEvent.type === 'ghost') {
+                lyricsDisplay.style.opacity = 0; // Прячем основной текст
+                ghostText.innerText = currentEvent.text;
+                ghostText.style.opacity = 1; // Показываем призрак
+            }
             else if (currentEvent.type === 'showLetter') {
                 displayLetter();
             }
@@ -89,7 +87,7 @@ function startValentine() {
     });
 
     function displayLetter() {
-        lyricsContainer.style.opacity = 0;
+        lyricsDisplay.style.opacity = 0;
         ghostText.style.opacity = 0;
 
         let volumeInterval = setInterval(() => {
@@ -101,10 +99,10 @@ function startValentine() {
             lyricsContainer.style.display = 'none';
             card.classList.remove('lyrics-mode');
             image.style.display = 'block';
-            letterContainer.style.display = 'block'; // Теперь эта переменная определена
+            letterContainer.style.display = 'block';
             setTimeout(() => {
                 image.style.opacity = 1;
-                letterContainer.style.opacity = 1; // И здесь тоже
+                letterContainer.style.opacity = 1;
             }, 50);
         }, 300);
     }
