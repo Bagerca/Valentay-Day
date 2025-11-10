@@ -2,26 +2,26 @@
 body {
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items-center;
     height: 100vh;
     margin: 0;
-    background-color: #121212; /* ИЗМЕНЕНО: Еще более глубокий черный фон */
-    font-family: 'Lato', sans-serif; /* ИЗМЕНЕНО: Новый шрифт по умолчанию */
+    background-color: #121212;
+    font-family: 'Lato', sans-serif;
     color: #f0f0f0;
-    overflow: hidden; /* Предотвращает случайную прокрутку */
+    overflow: hidden;
 }
 
 /* --- Стили для контейнеров --- */
 .card, .login-container {
-    background-color: #1E1E1E; /* ИЗМЕНЕНО: Более темный фон карточки */
+    background-color: #1E1E1E;
     padding: 40px 50px;
     border-radius: 15px;
-    box-shadow: 0 0 30px rgba(220, 20, 60, 0.5); /* Усиливаем свечение */
+    box-shadow: 0 0 30px rgba(220, 20, 60, 0.5);
     border: 1px solid #333;
     text-align: center;
-    max-width: 550px; /* Немного увеличим для нового шрифта */
+    max-width: 550px;
     width: 90%;
-    transition: background-color 0.8s ease-in-out, border 0.8s ease-in-out, box-shadow 0.8s ease-in-out; /* ИЗМЕНЕНО: Плавный переход для фона */
+    transition: all 0.5s ease-in-out; /* ИЗМЕНЕНО: Ускорили анимацию появления */
 }
 
 /* Класс, который делает фон невидимым */
@@ -47,40 +47,55 @@ button:hover { background-color: white; color: #dc143c; }
     border-radius: 15px;
     margin-bottom: 20px;
     border: 2px solid #444;
-    transition: opacity 0.8s ease-in-out;
+    transition: opacity 0.5s ease-in-out;
+}
+
+/* ДОБАВЛЕНО: Контейнер для строк, чтобы позиционировать "призрачный" текст */
+#lyrics-container {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 200px; /* Увеличили высоту для многострочного текста */
 }
 
 #lyrics {
-    font-family: 'Oswald', sans-serif; /* ИЗМЕНЕНО: Новый мощный шрифт */
-    font-size: 4em; /* ИЗМЕНЕНО: Увеличиваем размер */
+    font-family: 'Oswald', sans-serif;
+    font-size: 3.5em; /* Немного уменьшили для двух строк */
     font-weight: 700;
+    line-height: 1.2; /* Межстрочный интервал */
     color: #dc143c;
-    text-transform: uppercase; /* Все буквы заглавные для стиля */
-    letter-spacing: 2px; /* Небольшой интервал между буквами */
-    min-height: 150px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    text-transform: uppercase;
+    letter-spacing: 2px;
     text-shadow: 0 0 15px rgba(220, 20, 60, 0.7);
-    transition: opacity 0.2s ease-in-out; /* Резкое появление, но не мгновенное */
+    transition: opacity 0.2s ease-in-out;
+    white-space: pre-wrap; /* Позволяет использовать \n для переноса строк */
+    position: relative;
+    z-index: 2; /* Главный текст всегда сверху */
+}
+
+/* ДОБАВЛЕНО: Стили для "призрачного" текста */
+#ghost-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1; /* Позади главного текста */
+    font-family: 'Oswald', sans-serif;
+    font-size: 4em; /* Чуть больше для эффекта */
+    font-weight: 700;
+    color: #121212; /* Цвет фона */
+    -webkit-text-stroke: 1px #dc143c; /* Та самая магия с обводкой */
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
 }
 
 /* --- Стили для письма --- */
 #letter-container {
     display: none;
     opacity: 0;
-    transition: opacity 1s ease-in-out 0.5s; /* ИЗМЕНЕНО: Появляется с задержкой после фона */
+    transition: opacity 0.5s ease-in-out 0.3s; /* ИЗМЕНЕНО: Появляется быстрее */
     text-align: left;
 }
-#letter-container h2 {
-    color: #f0f0f0;
-    text-align: center;
-    margin-bottom: 20px;
-    font-weight: 700;
-}
-#letter-container p {
-    color: #ccc;
-    line-height: 1.7; /* Улучшаем читабельность */
-    font-size: 1.1em;
-    font-weight: 400;
-}
+#letter-container h2 { color: #f0f0f0; text-align: center; margin-bottom: 20px; font-weight: 700; }
+#letter-container p { color: #ccc; line-height: 1.7; font-size: 1.1em; font-weight: 400; }
