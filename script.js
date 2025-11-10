@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // ... (код для страницы входа остается прежним)
     if (document.getElementById('password')) {
         // Логика для страницы входа
     } 
@@ -14,7 +13,6 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function checkPassword() {
-    // ... (эта функция остается прежней)
     const passwordInput = document.getElementById('password');
     const errorMessage = document.getElementById('error-message');
     const correctPassword = '12345'; // !!! НЕ ЗАБУДЬ ПОМЕНЯТЬ ПАРОЛЬ
@@ -28,9 +26,8 @@ function checkPassword() {
     }
 }
 
-// --- НАЧАЛО БЛОКА АНАЛИЗА АУДИО (взят из плеера) ---
+// --- БЛОК АНАЛИЗА АУДИО ---
 
-// Глобальные переменные для аудиоанализатора
 let audioContext, analyser, audioSource, dataArray, bufferLength;
 let animationId = null;
 let currentPulseIntensity = 0;
@@ -38,9 +35,8 @@ let lastBeatTime = 0;
 let energyHistory = [];
 let energyAverage = 0;
 
-// Инициализация аудиоанализатора
 function initAudioAnalyzer(audioElement) {
-    if (audioContext) return; // Инициализируем только один раз
+    if (audioContext) return;
     try {
         audioContext = new (window.AudioContext || window.webkitAudioContext)();
         analyser = audioContext.createAnalyser();
@@ -57,7 +53,6 @@ function initAudioAnalyzer(audioElement) {
     }
 }
 
-// Анализ аудиоданных для определения бита и энергии
 function analyzeAudioFeatures() {
     if (!analyser) return { rms: 0, isBeat: false };
 
@@ -67,7 +62,7 @@ function analyzeAudioFeatures() {
     for (let i = 0; i < bufferLength; i++) {
         sum += dataArray[i] * dataArray[i];
     }
-    const rms = Math.sqrt(sum / bufferLength) / 255; // Общая энергия (громкость)
+    const rms = Math.sqrt(sum / bufferLength) / 255;
 
     energyHistory.push(rms);
     if (energyHistory.length > 30) energyHistory.shift();
@@ -75,17 +70,20 @@ function analyzeAudioFeatures() {
 
     let isBeat = false;
     const currentTime = Date.now();
-    // Порог для определения бита (можно настроить)
-    const threshold = energyAverage * 1.3 + 0.1; 
+    
+    // ИЗМЕНЕНО: Порог детектора битов снижен с 1.3 до 1.2 для большей чувствительности
+    const threshold = energyAverage * 1.2 + 0.08; 
 
-    if (rms > threshold && (currentTime - lastBeatTime) > 300) { // 300ms - задержка между битами
+    // ИЗМЕНЕНО: Задержка между битами уменьшена с 300ms до 200ms для реакции на быстрые биты
+    if (rms > threshold && (currentTime - lastBeatTime) > 200) {
         isBeat = true;
         lastBeatTime = currentTime;
         currentPulseIntensity = 1.0;
     }
 
     if (currentPulseIntensity > 0) {
-        currentPulseIntensity -= 0.05; // Скорость затухания пульсации
+        // ИЗМЕНЕНО: Скорость затухания увеличена с 0.05 до 0.07 для более резких "вспышек"
+        currentPulseIntensity -= 0.07; 
     } else {
         currentPulseIntensity = 0;
     }
@@ -93,7 +91,6 @@ function analyzeAudioFeatures() {
     return { rms, isBeat };
 }
 
-// Основной цикл визуализации
 function visualize() {
     const features = analyzeAudioFeatures();
     
@@ -101,14 +98,16 @@ function visualize() {
     const rightGlow = document.querySelector('.right-glow');
 
     if (leftGlow && rightGlow) {
-        let opacity = 0.5 + features.rms * 0.8;
-        let blur = 15 + features.rms * 25;
-        let spread = 25 + features.rms * 35;
+        // ИЗМЕНЕНО: Усилена базовая реакция на громкость (rms)
+        let opacity = 0.4 + features.rms * 1.2;
+        let blur = 10 + features.rms * 40;
+        let spread = 20 + features.rms * 50;
 
         if (features.isBeat) {
+            // ИЗМЕНЕНО: Реакция на бит сделана ГОРАЗДО более мощной
             opacity = 1.0;
-            blur = 30 + currentPulseIntensity * 20;
-            spread = 45 + currentPulseIntensity * 25;
+            blur = 40 + currentPulseIntensity * 35;
+            spread = 55 + currentPulseIntensity * 45;
         }
 
         const shadowStyle = `0 0 ${blur}px var(--accent-color), 0 0 ${spread}px var(--accent-color)`;
@@ -123,7 +122,6 @@ function visualize() {
 }
 
 // --- КОНЕЦ БЛОКА АНАЛИЗА АУДИО ---
-
 
 function startValentine() {
     const audio = document.getElementById('player');
@@ -160,7 +158,6 @@ function startValentine() {
         }, { once: true });
     });
 
-    // ИНИЦИИРУЕМ АНАЛИЗАТОР И ЗАПУСКАЕМ ВИЗУАЛИЗАЦИЮ
     audio.addEventListener('play', () => {
         initAudioAnalyzer(audio);
         if (!animationId) {
@@ -168,7 +165,6 @@ function startValentine() {
         }
     }, { once: true });
     
-    // ... (остальной код startValentine без изменений)
     let fadeInInterval = setInterval(() => {
         if (audio.volume < 0.7) { audio.volume = Math.min(0.7, audio.volume + 0.07); } 
         else { clearInterval(fadeInInterval); }
@@ -201,7 +197,6 @@ function startValentine() {
     });
     
     function displayLetter() {
-        // ... (эта функция остается прежней)
         lyricsDisplay.style.opacity = 0;
         ghostText.style.opacity = 0;
 
