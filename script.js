@@ -1,20 +1,13 @@
 document.addEventListener('DOMContentLoaded', () => {
     if (document.getElementById('password')) {
-        // Логика для страницы входа (index.html)
+        // Логика для страницы входа
     } 
     else if (document.getElementById('player')) {
-        // --- ЛОГИКА ЗАЩИТЫ СТРАНИЦЫ ---
-        // Проверяем, есть ли в хранилище сессии "ключ"
         const isVerified = sessionStorage.getItem('isVerified');
-
         if (isVerified !== 'true') {
-            // Если ключа нет — отправляем на страницу входа
             window.location.href = 'index.html';
         } else {
-            // Если ключ есть — запускаем валентинку
             startValentine();
-            // И сразу же удаляем ключ. Теперь при перезагрузке страницы его не будет,
-            // и пользователя снова перекинет на страницу входа.
             sessionStorage.removeItem('isVerified');
         }
     }
@@ -23,13 +16,9 @@ document.addEventListener('DOMContentLoaded', () => {
 function checkPassword() {
     const passwordInput = document.getElementById('password');
     const errorMessage = document.getElementById('error-message');
-    
-    // !!! ВАЖНО: Замените '12345' на ваш настоящий секретный пароль
-    const correctPassword = '12345'; 
+    const correctPassword = '12345'; // !!! НЕ ЗАБУДЬ ПОМЕНЯТЬ ПАРОЛЬ
 
     if (passwordInput.value === correctPassword) {
-        // --- ЛОГИКА ВХОДА ---
-        // Перед переходом на страницу валентинки, создаем "ключ" в хранилище сессии
         sessionStorage.setItem('isVerified', 'true');
         window.location.href = 'valentine.html';
     } else {
@@ -40,18 +29,17 @@ function checkPassword() {
 
 function startValentine() {
     const audio = document.getElementById('player');
-    const card = document.querySelector('.card'); // Находим карточку
-    const image = document.querySelector('.card img'); // Находим картинку
+    const card = document.querySelector('.card');
+    const image = document.querySelector('.card img');
     const lyricsContainer = document.getElementById('lyrics-container');
     const lyricsDisplay = document.getElementById('lyrics');
     const letterContainer = document.getElementById('letter-container');
     
-    // --- УПРАВЛЕНИЕ ВИЗУАЛОМ ---
-    // Сразу же скрываем фон карточки и картинку
+    // --- ИЗМЕНЕНО: Управление визуалом и громкостью ---
     card.classList.add('lyrics-mode');
     image.style.opacity = 0;
-    image.style.display = 'none'; // Также убираем из потока
-
+    image.style.display = 'none';
+    audio.volume = 0.7; // Устанавливаем громкость на 70%
     audio.currentTime = 23;
 
     const events = [
@@ -71,10 +59,8 @@ function startValentine() {
     });
 
     let currentEventIndex = 0;
-
     audio.addEventListener('timeupdate', function() {
         if (currentEventIndex >= events.length) return;
-
         if (audio.currentTime >= events[currentEventIndex].time) {
             const currentEvent = events[currentEventIndex];
             if (currentEvent.type === 'lyric') {
@@ -82,7 +68,7 @@ function startValentine() {
                 setTimeout(() => {
                     lyricsDisplay.textContent = currentEvent.text;
                     lyricsDisplay.style.opacity = 1;
-                }, 150); // Уменьшили задержку для резкости
+                }, 200);
             } 
             else if (currentEvent.type === 'showLetter') {
                 displayLetter();
@@ -92,22 +78,35 @@ function startValentine() {
     });
 
     function displayLetter() {
+        // --- ИЗМЕНЕНО: НОВАЯ ЛОГИКА ПЕРЕХОДА ---
+        // 1. Плавно прячем текст песни
         lyricsContainer.style.opacity = 0;
-        
-        // --- Возвращаем фон и картинку на место ---
-        card.classList.remove('lyrics-mode');
-        image.style.display = 'block';
-        setTimeout(() => { // Небольшая задержка, чтобы display сработал до opacity
-             image.style.opacity = 1;
-        }, 50);
 
-        setTimeout(() => {
-            lyricsContainer.style.display = 'none';
-        }, 500);
+        // 2. Начинаем плавно увеличивать громкость до 100%
+        let volumeInterval = setInterval(() => {
+            if (audio.volume < 1.0) {
+                // Math.min, чтобы случайно не превысить 1.0
+                audio.volume = Math.min(1.0, audio.volume + 0.02);
+            } else {
+                clearInterval(volumeInterval);
+            }
+        }, 50); // Увеличиваем громкость каждые 50мс
 
-        letterContainer.style.display = 'block';
+        // 3. Через полсекунды после исчезновения текста начинаем показывать фон
         setTimeout(() => {
-            letterContainer.style.opacity = 1;
-        }, 600);
+            lyricsContainer.style.display = 'none'; // Убираем окончательно
+            card.classList.remove('lyrics-mode'); // Запускает плавное появление фона
+            
+            // 4. Показываем картинку и письмо уже ВНУТРИ появившегося фона
+            image.style.display = 'block';
+            letterContainer.style.display = 'block';
+            
+            // Небольшая задержка для срабатывания display, затем включаем opacity
+            setTimeout(() => {
+                image.style.opacity = 1;
+                letterContainer.style.opacity = 1;
+            }, 100);
+
+        }, 500); // 500ms = 0.5s
     }
 }
