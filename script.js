@@ -126,15 +126,17 @@ function startValentine() {
     image.style.opacity = 0;
     image.style.display = 'none';
     
-    // ИЗМЕНЕНО: Новая точка старта и события для трека
-    audio.currentTime = 50;
+    // ИЗМЕНЕНО: Возвращены оригинальные тайминги и строчки
+    audio.currentTime = 23;
 
     const events = [
-        { time: 51, type: 'lyric', text: "Малыш, это последняя любовь" },
-        { time: 55, type: 'lyric', text: "Мне не нужны другие, только твой" },
-        { time: 59, type: 'lyric', text: "Запах на моей одежде" },
-        { time: 63, type: 'lyric', text: "Я вдыхаю его, и мне\nне становится легче" },
-        { time: 67, type: 'showLetter' }
+        { time: 23, type: 'lyric', text: "И я подонок, я изменщик,\nя gaslighter и абьюзер" },
+        { time: 27, type: 'lyric', text: "Я не нравлюсь твоей маме,\nда и хуй с ней" },
+        { time: 30, type: 'ghost', text: "(ну допустим)" },
+        { time: 31, type: 'lyric', text: "Детка, хватит мне уже давать\nпоследний шанс" },
+        { time: 34.5, type: 'ghost', text: "(ага)" },
+        { time: 35, type: 'lyric', text: "Счастье — это не для нас" },
+        { time: 38.5, type: 'showLetter' }
     ];
 
     audio.volume = 0;
@@ -223,8 +225,6 @@ function startValentine() {
     function updateProgress() {
         progressBar.value = audio.currentTime;
         currentTimeDisplay.textContent = formatTime(audio.currentTime);
-
-        // ИЗМЕНЕНО: Обновляем CSS-переменную для закрашивания ползунка
         const progressPercent = (audio.duration > 0) ? (audio.currentTime / audio.duration) * 100 : 0;
         progressBar.style.setProperty('--progress-percent', `${progressPercent}%`);
     }
