@@ -211,7 +211,7 @@ input[type="range"] {
     appearance: none;
     width: 100%;
     height: 6px;
-    background: transparent; /* Убираем фон по умолчанию, так как градиент будет на родительском элементе для Firefox */
+    background: #444; /* Фон для всего трека */
     border-radius: 5px;
     outline: none;
     cursor: pointer;
@@ -239,7 +239,7 @@ input[type="range"]::-webkit-slider-thumb {
     border: 2px solid #1E1E1E;
     box-shadow: 0 0 5px rgba(220, 20, 60, 0.7);
     transition: transform 0.2s ease;
-    margin-top: -5px;
+    margin-top: -5px; /* Вертикальное центрирование */
 }
 input[type="range"]::-moz-range-thumb {
     width: 16px;
@@ -252,15 +252,4 @@ input[type="range"]::-moz-range-thumb {
 
 input[type="range"]:hover::-webkit-slider-thumb {
     transform: scale(1.1);
-}
-
-/* ИСПРАВЛЕНО: Новый, более безопасный метод скрытия скроллбара */
-body.scrollable::-webkit-scrollbar {
-    width: 0;
-    height: 0;
-}
-
-body.scrollable {
-    scrollbar-width: none; /* Для Firefox */
-    -ms-overflow-style: none; /* Для IE и Edge */
 }
