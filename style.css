@@ -1,106 +1,129 @@
-/* --- Общие стили для всего проекта --- */
+/* --- Общие стили --- */
 body {
     display: flex;
-    justify-content: center; /* Центрирование по горизонтали */
-    align-items: center;   /* Центрирование по вертикали */
-    height: 100vh;         /* Высота на весь экран */
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
     margin: 0;
-    background-color: #fce4ec; /* Нежно-розовый фон */
+    background-color: #1a1a1a; /* Глубокий графитовый фон */
     font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif;
-    color: #333;
+    color: #f0f0f0; /* Светло-серый текст для читаемости */
 }
 
-/* --- Стили для основного контейнера (карточки) --- */
-/* Этот стиль используется и для login-container, и для card */
+/* --- Стили для контейнеров --- */
 .card, .login-container {
-    background-color: white;
+    background-color: #2b2b2b; /* Темно-серый фон для карточки */
     padding: 40px 50px;
-    border-radius: 20px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    border-radius: 15px;
+    box-shadow: 0 0 25px rgba(220, 20, 60, 0.4); /* Алое свечение */
+    border: 1px solid #444;
     text-align: center;
-    max-width: 450px;
+    max-width: 500px;
     width: 90%;
-    border: 1px solid #fff;
 }
 
-/* --- Стили для страницы входа (login.html) --- */
+/* --- Стили для страницы входа --- */
 
 .login-container h1 {
-    color: #333;
+    color: #f0f0f0;
     font-size: 1.8em;
     margin-bottom: 25px;
 }
 
-/* Уведомление с просьбой включить звук */
 .notification {
-    background-color: #fffde7; /* Светло-желтый фон */
-    border: 1px solid #ffc107;  /* Янтарная рамка */
+    background-color: #333;
+    border: 1px solid #dc143c; /* Алая рамка */
     padding: 15px;
     border-radius: 10px;
     margin-bottom: 25px;
-    color: #5d4037;
+    color: #f0f0f0;
 }
 
-/* Поле для ввода пароля */
 input[type="password"] {
     width: 100%;
     padding: 12px;
     margin-bottom: 20px;
-    border: 1px solid #ddd;
+    border: 1px solid #555;
     border-radius: 8px;
-    box-sizing: border-box; /* Чтобы padding не влиял на ширину */
+    box-sizing: border-box;
     font-size: 1em;
     text-align: center;
+    background-color: #1a1a1a; /* Такой же, как фон */
+    color: #f0f0f0;
+    transition: all 0.3s ease;
 }
 
 input[type="password"]:focus {
     outline: none;
-    border-color: #e91e63; /* Подсветка при фокусе */
+    border-color: #dc143c; /* Алая подсветка при фокусе */
+    box-shadow: 0 0 10px rgba(220, 20, 60, 0.5);
 }
 
-/* Кнопка "Войти" */
 button {
     padding: 12px 30px;
     border: none;
-    background-color: #e91e63; /* Ярко-розовый */
+    background-color: #dc143c; /* Алый цвет */
     color: white;
     border-radius: 8px;
     cursor: pointer;
     font-size: 1em;
     font-weight: bold;
-    transition: background-color 0.3s ease;
+    transition: all 0.3s ease;
 }
 
 button:hover {
-    background-color: #c2185b; /* Более темный розовый при наведении */
+    background-color: white;
+    color: #dc143c; /* Инверсия цветов при наведении */
 }
 
-/* Сообщение об ошибке */
 .error {
-    color: #d32f2f; /* Красный цвет для ошибки */
+    color: #ff4d4d; /* Ярко-красный для ошибки */
     margin-top: 15px;
-    height: 20px; /* Резервируем место, чтобы контейнер не прыгал */
+    height: 20px;
     font-weight: bold;
 }
 
-/* --- Стили для основной страницы (index.html) --- */
+/* --- Стили для основной страницы валентинки --- */
 
-/* GIF-изображение */
 .card img {
     max-width: 100%;
     height: auto;
     border-radius: 15px;
     margin-bottom: 20px;
+    border: 2px solid #444;
 }
 
-/* Заголовок с текстом песни */
+#lyrics-container {
+    transition: opacity 0.5s ease-in-out;
+}
+
 #lyrics {
     font-size: 2.2em;
     font-weight: bold;
-    color: #e91e63;
-    min-height: 120px; /* Минимальная высота, чтобы избежать "прыжков" при смене текста */
+    color: #dc143c; /* Алый текст песни */
+    min-height: 120px;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: opacity 0.5s ease-in-out; /* Плавное появление текста */
+    transition: opacity 0.3s ease-in-out;
+}
+
+/* --- Стили для письма --- */
+#letter-container {
+    display: none; /* Изначально скрыто */
+    opacity: 0;    /* Изначально прозрачно */
+    transition: opacity 0.8s ease-in-out;
+    text-align: left; /* Выравнивание по левому краю для читаемости */
+}
+
+#letter-container h2 {
+    color: #f0f0f0;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+#letter-container p {
+    color: #ccc;
+    line-height: 1.6; /* Увеличенный межстрочный интервал */
+    font-size: 1.1em;
 }
