@@ -5,84 +5,40 @@ body {
     align-items: center;
     height: 100vh;
     margin: 0;
-    background-color: #1a1a1a;
-    font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif;
+    background-color: #121212; /* ИЗМЕНЕНО: Еще более глубокий черный фон */
+    font-family: 'Lato', sans-serif; /* ИЗМЕНЕНО: Новый шрифт по умолчанию */
     color: #f0f0f0;
+    overflow: hidden; /* Предотвращает случайную прокрутку */
 }
 
 /* --- Стили для контейнеров --- */
 .card, .login-container {
-    background-color: #2b2b2b;
+    background-color: #1E1E1E; /* ИЗМЕНЕНО: Более темный фон карточки */
     padding: 40px 50px;
     border-radius: 15px;
-    box-shadow: 0 0 25px rgba(220, 20, 60, 0.4);
-    border: 1px solid #444;
+    box-shadow: 0 0 30px rgba(220, 20, 60, 0.5); /* Усиливаем свечение */
+    border: 1px solid #333;
     text-align: center;
-    max-width: 500px;
+    max-width: 550px; /* Немного увеличим для нового шрифта */
     width: 90%;
-    transition: all 0.5s ease-in-out; /* Плавный переход для фона */
+    transition: background-color 0.8s ease-in-out, border 0.8s ease-in-out, box-shadow 0.8s ease-in-out; /* ИЗМЕНЕНО: Плавный переход для фона */
 }
 
-/* Новый класс, который делает фон невидимым */
+/* Класс, который делает фон невидимым */
 .card.lyrics-mode {
     background-color: transparent;
-    border: none;
+    border-color: transparent;
     box-shadow: none;
 }
 
-/* --- Стили для страницы входа --- */
-.login-container h1 {
-    color: #f0f0f0;
-    font-size: 1.8em;
-    margin-bottom: 25px;
-}
-.notification {
-    background-color: #333;
-    border: 1px solid #dc143c;
-    padding: 15px;
-    border-radius: 10px;
-    margin-bottom: 25px;
-    color: #f0f0f0;
-}
-input[type="password"] {
-    width: 100%;
-    padding: 12px;
-    margin-bottom: 20px;
-    border: 1px solid #555;
-    border-radius: 8px;
-    box-sizing: border-box;
-    font-size: 1em;
-    text-align: center;
-    background-color: #1a1a1a;
-    color: #f0f0f0;
-    transition: all 0.3s ease;
-}
-input[type="password"]:focus {
-    outline: none;
-    border-color: #dc143c;
-    box-shadow: 0 0 10px rgba(220, 20, 60, 0.5);
-}
-button {
-    padding: 12px 30px;
-    border: none;
-    background-color: #dc143c;
-    color: white;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 1em;
-    font-weight: bold;
-    transition: all 0.3s ease;
-}
-button:hover {
-    background-color: white;
-    color: #dc143c;
-}
-.error {
-    color: #ff4d4d;
-    margin-top: 15px;
-    height: 20px;
-    font-weight: bold;
-}
+/* --- Стили для страницы входа (без изменений) --- */
+.login-container h1 { color: #f0f0f0; font-size: 1.8em; margin-bottom: 25px; }
+.notification { background-color: #2b2b2b; border: 1px solid #dc143c; padding: 15px; border-radius: 10px; margin-bottom: 25px; color: #f0f0f0; }
+input[type="password"] { width: 100%; padding: 12px; margin-bottom: 20px; border: 1px solid #555; border-radius: 8px; box-sizing: border-box; font-size: 1em; text-align: center; background-color: #121212; color: #f0f0f0; transition: all 0.3s ease; }
+input[type="password"]:focus { outline: none; border-color: #dc143c; box-shadow: 0 0 10px rgba(220, 20, 60, 0.5); }
+button { padding: 12px 30px; border: none; background-color: #dc143c; color: white; border-radius: 8px; cursor: pointer; font-size: 1em; font-weight: bold; transition: all 0.3s ease; }
+button:hover { background-color: white; color: #dc143c; }
+.error { color: #ff4d4d; margin-top: 15px; height: 20px; font-weight: bold; }
 
 /* --- Стили для основной страницы валентинки --- */
 .card img {
@@ -91,37 +47,40 @@ button:hover {
     border-radius: 15px;
     margin-bottom: 20px;
     border: 2px solid #444;
-    transition: opacity 0.5s ease-in-out; /* Плавное исчезновение */
+    transition: opacity 0.8s ease-in-out;
 }
-#lyrics-container {
-    transition: opacity 0.5s ease-in-out;
-}
+
 #lyrics {
-    font-family: 'Sedgwick Ave Display', cursive; /* Применяем новый шрифт */
-    font-size: 3.5em; /* Увеличиваем шрифт, так как он теперь главный элемент */
-    font-weight: normal; /* Для кастомных шрифтов лучше normal */
+    font-family: 'Oswald', sans-serif; /* ИЗМЕНЕНО: Новый мощный шрифт */
+    font-size: 4em; /* ИЗМЕНЕНО: Увеличиваем размер */
+    font-weight: 700;
     color: #dc143c;
-    min-height: 120px;
+    text-transform: uppercase; /* Все буквы заглавные для стиля */
+    letter-spacing: 2px; /* Небольшой интервал между буквами */
+    min-height: 150px;
     display: flex;
     align-items: center;
     justify-content: center;
-    text-shadow: 0 0 10px rgba(220, 20, 60, 0.7); /* Добавляем тексту свечение */
-    transition: opacity 0.15s ease-in-out; /* Более резкая анимация */
+    text-shadow: 0 0 15px rgba(220, 20, 60, 0.7);
+    transition: opacity 0.2s ease-in-out; /* Резкое появление, но не мгновенное */
 }
+
 /* --- Стили для письма --- */
 #letter-container {
     display: none;
     opacity: 0;
-    transition: opacity 0.8s ease-in-out;
+    transition: opacity 1s ease-in-out 0.5s; /* ИЗМЕНЕНО: Появляется с задержкой после фона */
     text-align: left;
 }
 #letter-container h2 {
     color: #f0f0f0;
     text-align: center;
     margin-bottom: 20px;
+    font-weight: 700;
 }
 #letter-container p {
     color: #ccc;
-    line-height: 1.6;
+    line-height: 1.7; /* Улучшаем читабельность */
     font-size: 1.1em;
+    font-weight: 400;
 }
