@@ -4,19 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Для тебя...</title>
+    
+    <!-- Ссылка на Google Fonts для нового шрифта -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sedgwick+Ave+Display&display=swap" rel="stylesheet">
+
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="card">
-        <!-- Можете заменить GIF на что-то более подходящее стилю, например: https://media.tenor.com/j5t3C-k-iMAAAAAC/anime-couple.gif -->
+        <!-- Этот GIF будет скрыт во время показа строк песни -->
         <img src="https://media.tenor.com/E28vIanjT5cAAAAi/love-you.gif" alt="valentine-gif">
         
-        <!-- Контейнер для текста песни (будет скрыт позже) -->
         <div id="lyrics-container">
             <h1 id="lyrics">...</h1>
         </div>
 
-        <!-- Скрытый контейнер для твоего письма -->
         <div id="letter-container">
             <h2>А теперь серьезно...</h2>
             <p>
@@ -25,7 +29,6 @@
                 ЗАМЕНИ ЭТОТ ТЕКСТ НА СВОЕ ЛИЧНОЕ ПИСЬМО.
                 Используй <br><br> для создания нового абзаца.
                 -->
-
                 Возможно, эта песня кажется странным выбором для валентинки, но я хотел начать с чего-то дерзкого, чтобы потом сказать главное.
                 <br><br>
                 На самом деле, все эти слова из песни — полная противоположность тому, что я к тебе чувствую. Спасибо тебе за всё.
@@ -35,10 +38,7 @@
         </div>
     </div>
 
-    <!-- Аудиоплеер (он будет невидимым) -->
     <audio id="player" src="music.mp3"></audio>
-
-    <!-- Подключаем наш скрипт -->
     <script src="script.js"></script>
 </body>
 </html>
