@@ -126,7 +126,6 @@ function startValentine() {
     image.style.opacity = 0;
     image.style.display = 'none';
     
-    // ИЗМЕНЕНО: Возвращены оригинальные тайминги и строчки
     audio.currentTime = 23;
 
     const events = [
@@ -228,10 +227,17 @@ function startValentine() {
         const progressPercent = (audio.duration > 0) ? (audio.currentTime / audio.duration) * 100 : 0;
         progressBar.style.setProperty('--progress-percent', `${progressPercent}%`);
     }
+
+    // ИЗМЕНЕНО: Новая функция для обновления заливки ползунка громкости
+    function updateVolumeSliderFill() {
+        const percent = audio.muted ? 0 : audio.volume * 100;
+        volumeSlider.style.setProperty('--volume-percent', `${percent}%`);
+    }
     
     audio.addEventListener('loadedmetadata', () => {
         progressBar.max = audio.duration;
         totalDurationDisplay.textContent = formatTime(audio.duration);
+        updateVolumeSliderFill(); // Устанавливаем начальное состояние
     });
     
     playPauseBtn.addEventListener('click', () => {
@@ -263,6 +269,7 @@ function startValentine() {
             volumeSlider.value = audio.volume;
         }
         updateVolumeIcon();
+        updateVolumeSliderFill(); // Обновляем заливку при любом изменении громкости
     });
     
     function displayLetter() {
@@ -278,6 +285,9 @@ function startValentine() {
         }, 50);
 
         setTimeout(() => {
+            // ИЗМЕНЕНО: Добавляем класс для включения скролла
+            document.body.classList.add('scrollable');
+            
             lyricsContainer.style.display = 'none';
             card.classList.remove('lyrics-mode');
             image.style.display = 'block';
