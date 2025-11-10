@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // ... (код для страницы входа остается прежним)
     if (document.getElementById('password')) {
         // Логика для страницы входа
     } 
@@ -13,6 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function checkPassword() {
+    // ... (эта функция остается прежней)
     const passwordInput = document.getElementById('password');
     const errorMessage = document.getElementById('error-message');
     const correctPassword = '12345'; // !!! НЕ ЗАБУДЬ ПОМЕНЯТЬ ПАРОЛЬ
@@ -25,6 +27,103 @@ function checkPassword() {
         passwordInput.value = '';
     }
 }
+
+// --- НАЧАЛО БЛОКА АНАЛИЗА АУДИО (взят из плеера) ---
+
+// Глобальные переменные для аудиоанализатора
+let audioContext, analyser, audioSource, dataArray, bufferLength;
+let animationId = null;
+let currentPulseIntensity = 0;
+let lastBeatTime = 0;
+let energyHistory = [];
+let energyAverage = 0;
+
+// Инициализация аудиоанализатора
+function initAudioAnalyzer(audioElement) {
+    if (audioContext) return; // Инициализируем только один раз
+    try {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        analyser = audioContext.createAnalyser();
+        audioSource = audioContext.createMediaElementSource(audioElement);
+
+        audioSource.connect(analyser);
+        analyser.connect(audioContext.destination);
+
+        analyser.fftSize = 256;
+        bufferLength = analyser.frequencyBinCount;
+        dataArray = new Uint8Array(bufferLength);
+    } catch (error) {
+        console.error("Не удалось инициализировать Web Audio API", error);
+    }
+}
+
+// Анализ аудиоданных для определения бита и энергии
+function analyzeAudioFeatures() {
+    if (!analyser) return { rms: 0, isBeat: false };
+
+    analyser.getByteFrequencyData(dataArray);
+
+    let sum = 0;
+    for (let i = 0; i < bufferLength; i++) {
+        sum += dataArray[i] * dataArray[i];
+    }
+    const rms = Math.sqrt(sum / bufferLength) / 255; // Общая энергия (громкость)
+
+    energyHistory.push(rms);
+    if (energyHistory.length > 30) energyHistory.shift();
+    energyAverage = energyHistory.reduce((a, b) => a + b, 0) / energyHistory.length;
+
+    let isBeat = false;
+    const currentTime = Date.now();
+    // Порог для определения бита (можно настроить)
+    const threshold = energyAverage * 1.3 + 0.1; 
+
+    if (rms > threshold && (currentTime - lastBeatTime) > 300) { // 300ms - задержка между битами
+        isBeat = true;
+        lastBeatTime = currentTime;
+        currentPulseIntensity = 1.0;
+    }
+
+    if (currentPulseIntensity > 0) {
+        currentPulseIntensity -= 0.05; // Скорость затухания пульсации
+    } else {
+        currentPulseIntensity = 0;
+    }
+    
+    return { rms, isBeat };
+}
+
+// Основной цикл визуализации
+function visualize() {
+    const features = analyzeAudioFeatures();
+    
+    const leftGlow = document.querySelector('.left-glow');
+    const rightGlow = document.querySelector('.right-glow');
+
+    if (leftGlow && rightGlow) {
+        let opacity = 0.5 + features.rms * 0.8;
+        let blur = 15 + features.rms * 25;
+        let spread = 25 + features.rms * 35;
+
+        if (features.isBeat) {
+            opacity = 1.0;
+            blur = 30 + currentPulseIntensity * 20;
+            spread = 45 + currentPulseIntensity * 25;
+        }
+
+        const shadowStyle = `0 0 ${blur}px var(--accent-color), 0 0 ${spread}px var(--accent-color)`;
+        
+        leftGlow.style.opacity = opacity;
+        leftGlow.style.boxShadow = shadowStyle;
+        rightGlow.style.opacity = opacity;
+        rightGlow.style.boxShadow = shadowStyle;
+    }
+
+    animationId = requestAnimationFrame(visualize);
+}
+
+// --- КОНЕЦ БЛОКА АНАЛИЗА АУДИО ---
+
 
 function startValentine() {
     const audio = document.getElementById('player');
@@ -52,13 +151,24 @@ function startValentine() {
     ];
 
     audio.volume = 0;
-    audio.play().catch(error => {
+    
+    const playPromise = audio.play();
+    playPromise.catch(error => {
         lyricsDisplay.textContent = "Нажми, чтобы начать ♡";
-        document.body.addEventListener('click', () => { audio.play(); }, { once: true });
+        document.body.addEventListener('click', () => { 
+            audio.play();
+        }, { once: true });
     });
 
-    // ИСПРАВЛЕНО: Строка visualizer.classList.add('visible'); отсюда УБРАНА.
-
+    // ИНИЦИИРУЕМ АНАЛИЗАТОР И ЗАПУСКАЕМ ВИЗУАЛИЗАЦИЮ
+    audio.addEventListener('play', () => {
+        initAudioAnalyzer(audio);
+        if (!animationId) {
+            visualize();
+        }
+    }, { once: true });
+    
+    // ... (остальной код startValentine без изменений)
     let fadeInInterval = setInterval(() => {
         if (audio.volume < 0.7) { audio.volume = Math.min(0.7, audio.volume + 0.07); } 
         else { clearInterval(fadeInInterval); }
@@ -73,12 +183,11 @@ function startValentine() {
             if (currentEvent.type === 'lyric' || currentEvent.type === 'ghost') {
                 lyricsDisplay.style.opacity = 0;
                 ghostText.style.opacity = 0;
-
                 setTimeout(() => {
                     if (currentEvent.type === 'lyric') {
                         lyricsDisplay.innerText = currentEvent.text;
                         lyricsDisplay.style.opacity = 1;
-                    } else { // 'ghost'
+                    } else {
                         ghostText.innerText = currentEvent.text;
                         ghostText.style.opacity = 1;
                     }
@@ -92,8 +201,7 @@ function startValentine() {
     });
     
     function displayLetter() {
-        // ИСПРАВЛЕНО: Строка visualizer.classList.remove('visible'); отсюда УБРАНА.
-        
+        // ... (эта функция остается прежней)
         lyricsDisplay.style.opacity = 0;
         ghostText.style.opacity = 0;
 
@@ -108,14 +216,12 @@ function startValentine() {
             image.style.display = 'block';
             letterContainer.style.display = 'block';
             
-            // ИСПРАВЛЕНО: Визуализатор теперь появляется вместе с письмом.
             visualizer.classList.add('visible');
 
             setTimeout(() => {
                 image.style.opacity = 1;
                 letterContainer.style.opacity = 1;
                 
-                // --- ЛОГИКА ПЕЧАТНОЙ МАШИНКИ ---
                 const letterP = letterContainer.querySelector('p');
                 const fullText = `Ты сказала "забить". Я пытался. Не вышло.<br><br>Назвать тебя Спящей Красавицей — ирония, ведь ты вообще не даешь мне спать.<br><br>И хватит себя ругать. Ты даже не представляешь, насколько ты крутая, даже со всеми своими "сложностями". Я вижу твой свет, даже когда ты сама его не замечаешь.<br><br>Понятия не имею, что будет дальше. Знаю только одно: я всё ещё здесь.<br><br><b>Bagerca для Fasil</b>`;
                 letterP.innerHTML = ''; 
