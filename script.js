@@ -40,13 +40,12 @@ function startValentine() {
     image.style.display = 'none';
     audio.currentTime = 23;
 
-    // ИЗМЕНЕНО: Полностью переработанная временная шкала событий
     const events = [
         { time: 23, type: 'lyric', text: "И я подонок, я изменщик,\nя gaslighter и абьюзер" },
         { time: 27, type: 'lyric', text: "Я не нравлюсь твоей маме,\nда и хуй с ней" },
         { time: 30, type: 'ghost', text: "(ну допустим)" },
         { time: 31, type: 'lyric', text: "Детка, хватит мне уже давать\nпоследний шанс" },
-        { time: 34.5, type: 'ghost', text: "(ага)" }, // Появляется чуть раньше для эффекта
+        { time: 34.5, type: 'ghost', text: "(ага)" },
         { time: 35, type: 'lyric', text: "Счастье — это не для нас" },
         { time: 38.5, type: 'showLetter' }
     ];
@@ -67,17 +66,24 @@ function startValentine() {
         if (currentEventIndex >= events.length) return;
         if (audio.currentTime >= events[currentEventIndex].time) {
             const currentEvent = events[currentEventIndex];
+            
+            // ИЗМЕНЕНО: Возвращаем логику плавного перехода
+            if (currentEvent.type === 'lyric' || currentEvent.type === 'ghost') {
+                // 1. Сначала всё прячем
+                lyricsDisplay.style.opacity = 0;
+                ghostText.style.opacity = 0;
 
-            // ИЗМЕНЕНО: Новая логика для управления текстами
-            if (currentEvent.type === 'lyric') {
-                ghostText.style.opacity = 0; // Прячем призрак
-                lyricsDisplay.innerText = currentEvent.text;
-                lyricsDisplay.style.opacity = 1; // Показываем основной текст
-            } 
-            else if (currentEvent.type === 'ghost') {
-                lyricsDisplay.style.opacity = 0; // Прячем основной текст
-                ghostText.innerText = currentEvent.text;
-                ghostText.style.opacity = 1; // Показываем призрак
+                // 2. Ждем, пока анимация затухания закончится (200мс из CSS)
+                setTimeout(() => {
+                    // 3. Меняем текст и показываем нужный элемент
+                    if (currentEvent.type === 'lyric') {
+                        lyricsDisplay.innerText = currentEvent.text;
+                        lyricsDisplay.style.opacity = 1;
+                    } else { // 'ghost'
+                        ghostText.innerText = currentEvent.text;
+                        ghostText.style.opacity = 1;
+                    }
+                }, 200); // Эта задержка создает "паузу" и плавность
             }
             else if (currentEvent.type === 'showLetter') {
                 displayLetter();
