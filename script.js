@@ -1,105 +1,110 @@
-// --- Этот код будет работать на обеих страницах ---
-
 document.addEventListener('DOMContentLoaded', () => {
-    // Если на странице есть элемент с id 'password', значит это страница входа
     if (document.getElementById('password')) {
-        // Код для страницы входа (index.html)
-        // Функция checkPassword вызывается по клику на кнопку в HTML
+        // Логика для страницы входа (index.html)
     } 
-    // Если есть элемент с id 'player', значит это основная страница
     else if (document.getElementById('player')) {
-        // Запускаем основную логику для страницы валентинки
-        startValentine();
+        // --- ЛОГИКА ЗАЩИТЫ СТРАНИЦЫ ---
+        // Проверяем, есть ли в хранилище сессии "ключ"
+        const isVerified = sessionStorage.getItem('isVerified');
+
+        if (isVerified !== 'true') {
+            // Если ключа нет — отправляем на страницу входа
+            window.location.href = 'index.html';
+        } else {
+            // Если ключ есть — запускаем валентинку
+            startValentine();
+            // И сразу же удаляем ключ. Теперь при перезагрузке страницы его не будет,
+            // и пользователя снова перекинет на страницу входа.
+            sessionStorage.removeItem('isVerified');
+        }
     }
 });
-
-
-// --- Логика для страницы входа (index.html) ---
 
 function checkPassword() {
     const passwordInput = document.getElementById('password');
     const errorMessage = document.getElementById('error-message');
     
-    // !!! ВАЖНО: Замените '12345' на ваш настоящий секретный пароль !!!
+    // !!! ВАЖНО: Замените '12345' на ваш настоящий секретный пароль
     const correctPassword = '12345'; 
 
     if (passwordInput.value === correctPassword) {
-        // Если пароль верный, переходим на главную страницу
+        // --- ЛОГИКА ВХОДА ---
+        // Перед переходом на страницу валентинки, создаем "ключ" в хранилище сессии
+        sessionStorage.setItem('isVerified', 'true');
         window.location.href = 'valentine.html';
     } else {
-        // Если пароль неверный, показываем ошибку
         errorMessage.textContent = 'Неверный ключ, попробуй еще раз!';
-        passwordInput.value = ''; // Очищаем поле ввода
+        passwordInput.value = '';
     }
 }
 
-
-// --- Логика для основной страницы (valentine.html) ---
-
 function startValentine() {
     const audio = document.getElementById('player');
+    const card = document.querySelector('.card'); // Находим карточку
+    const image = document.querySelector('.card img'); // Находим картинку
     const lyricsContainer = document.getElementById('lyrics-container');
     const lyricsDisplay = document.getElementById('lyrics');
     const letterContainer = document.getElementById('letter-container');
+    
+    // --- УПРАВЛЕНИЕ ВИЗУАЛОМ ---
+    // Сразу же скрываем фон карточки и картинку
+    card.classList.add('lyrics-mode');
+    image.style.opacity = 0;
+    image.style.display = 'none'; // Также убираем из потока
 
-    // Устанавливаем начальное время воспроизведения на 23 секунды
     audio.currentTime = 23;
 
-    // Массив событий: 4 строчки песни и 1 событие для показа письма
     const events = [
         { time: 23, text: "И я подонок, я изменщик, я gaslighter и абьюзер", type: 'lyric' },
         { time: 27, text: "Я не нравлюсь твоей маме, да и хуй с ней", type: 'lyric' },
         { time: 31, text: "Детка, хватит мне уже давать последний шанс", type: 'lyric' },
         { time: 35, text: "Счастье — это не для нас", type: 'lyric' },
-        // Специальное событие: в 39 секунд показываем письмо
         { time: 39, type: 'showLetter' } 
     ];
 
-    // Пытаемся запустить аудио
     audio.play().catch(error => {
-        console.log("Воспроизведение заблокировано браузером. Требуется действие пользователя.");
         lyricsDisplay.textContent = "Нажми, чтобы начать ♡";
         document.body.addEventListener('click', () => {
-            audio.currentTime = 23; // Убедимся, что при клике тоже начнется с 23 сек
+            audio.currentTime = 23;
             audio.play();
         }, { once: true });
     });
 
     let currentEventIndex = 0;
 
-    // Эта функция следит за временем песни и запускает события
     audio.addEventListener('timeupdate', function() {
-        if (currentEventIndex >= events.length) return; // Если все события прошли, ничего не делаем
+        if (currentEventIndex >= events.length) return;
 
         if (audio.currentTime >= events[currentEventIndex].time) {
             const currentEvent = events[currentEventIndex];
-
             if (currentEvent.type === 'lyric') {
-                // Показываем строчку песни
                 lyricsDisplay.style.opacity = 0;
                 setTimeout(() => {
                     lyricsDisplay.textContent = currentEvent.text;
                     lyricsDisplay.style.opacity = 1;
-                }, 300);
+                }, 150); // Уменьшили задержку для резкости
             } 
             else if (currentEvent.type === 'showLetter') {
-                // Показываем письмо
                 displayLetter();
             }
-            
             currentEventIndex++;
         }
     });
 
-    // Функция для плавного перехода от текста песни к письму
     function displayLetter() {
-        // Плавно прячем текст песни
         lyricsContainer.style.opacity = 0;
+        
+        // --- Возвращаем фон и картинку на место ---
+        card.classList.remove('lyrics-mode');
+        image.style.display = 'block';
+        setTimeout(() => { // Небольшая задержка, чтобы display сработал до opacity
+             image.style.opacity = 1;
+        }, 50);
+
         setTimeout(() => {
             lyricsContainer.style.display = 'none';
-        }, 500); // 0.5с
+        }, 500);
 
-        // Плавно показываем письмо
         letterContainer.style.display = 'block';
         setTimeout(() => {
             letterContainer.style.opacity = 1;
