@@ -1,32 +1,31 @@
 // --- Этот код будет работать на обеих страницах ---
 
-// Проверяем, какая сейчас страница, чтобы выполнить нужный код
 document.addEventListener('DOMContentLoaded', () => {
     // Если на странице есть элемент с id 'password', значит это страница входа
     if (document.getElementById('password')) {
-        // Код для login.html
+        // Код для страницы входа (index.html)
         // Функция checkPassword вызывается по клику на кнопку в HTML
     } 
     // Если есть элемент с id 'player', значит это основная страница
     else if (document.getElementById('player')) {
-        // Код для index.html
+        // Запускаем основную логику для страницы валентинки
         startValentine();
     }
 });
 
 
-// --- Логика для страницы входа (login.html) ---
+// --- Логика для страницы входа (index.html) ---
 
 function checkPassword() {
     const passwordInput = document.getElementById('password');
     const errorMessage = document.getElementById('error-message');
     
-    // !!! ВАЖНО: Замените '12345' на ваш настоящий секретный пароль
+    // !!! ВАЖНО: Замените '12345' на ваш настоящий секретный пароль !!!
     const correctPassword = '12345'; 
 
     if (passwordInput.value === correctPassword) {
         // Если пароль верный, переходим на главную страницу
-        window.location.href = 'index.html';
+        window.location.href = 'valentine.html';
     } else {
         // Если пароль неверный, показываем ошибку
         errorMessage.textContent = 'Неверный ключ, попробуй еще раз!';
@@ -35,58 +34,75 @@ function checkPassword() {
 }
 
 
-// --- Логика для основной страницы (index.html) ---
+// --- Логика для основной страницы (valentine.html) ---
 
 function startValentine() {
     const audio = document.getElementById('player');
+    const lyricsContainer = document.getElementById('lyrics-container');
     const lyricsDisplay = document.getElementById('lyrics');
+    const letterContainer = document.getElementById('letter-container');
 
-    // !!! ВАЖНО: Настройте тайминги и текст песни здесь
-    // time: время в секундах, когда должна появиться строчка
-    // text: текст строчки
-    const lyrics = [
-        { time: 0, text: "Ты готова?" },
-        { time: 2.5, text: "Ты — моя последняя любовь" },
-        { time: 6, text: "Моя последняя любовь" },
-        { time: 9.5, text: "Я не хочу другую" },
-        { time: 13, text: "Мне не нужна другая" },
-        { time: 16.5, text: "Ты — моя последняя любовь" },
-        { time: 20, text: "И первая тоже..." },
-        { time: 24, text: "С Днём Святого Валентина!" },
-        // ... Добавьте столько строчек, сколько нужно
+    // Устанавливаем начальное время воспроизведения на 23 секунды
+    audio.currentTime = 23;
+
+    // Массив событий: 4 строчки песни и 1 событие для показа письма
+    const events = [
+        { time: 23, text: "И я подонок, я изменщик, я gaslighter и абьюзер", type: 'lyric' },
+        { time: 27, text: "Я не нравлюсь твоей маме, да и хуй с ней", type: 'lyric' },
+        { time: 31, text: "Детка, хватит мне уже давать последний шанс", type: 'lyric' },
+        { time: 35, text: "Счастье — это не для нас", type: 'lyric' },
+        // Специальное событие: в 39 секунд показываем письмо
+        { time: 39, type: 'showLetter' } 
     ];
 
-    // Пытаемся запустить аудио автоматически
-    // Современные браузеры могут блокировать это до первого клика.
-    // Переход со страницы логина часто считается таким взаимодействием.
+    // Пытаемся запустить аудио
     audio.play().catch(error => {
         console.log("Воспроизведение заблокировано браузером. Требуется действие пользователя.");
-        // Как запасной вариант, можно показать кнопку "Начать"
         lyricsDisplay.textContent = "Нажми, чтобы начать ♡";
         document.body.addEventListener('click', () => {
+            audio.currentTime = 23; // Убедимся, что при клике тоже начнется с 23 сек
             audio.play();
-        }, { once: true }); // Cработает только один раз
+        }, { once: true });
     });
 
-    let currentLyricIndex = 0;
+    let currentEventIndex = 0;
 
-    // Эта функция будет вызываться каждый раз, когда меняется время воспроизведения
+    // Эта функция следит за временем песни и запускает события
     audio.addEventListener('timeupdate', function() {
-        // Проверяем, есть ли еще строчки и подошло ли время для следующей
-        if (currentLyricIndex < lyrics.length && audio.currentTime >= lyrics[currentLyricIndex].time) {
-            lyricsDisplay.style.opacity = 0; // Делаем текст прозрачным
+        if (currentEventIndex >= events.length) return; // Если все события прошли, ничего не делаем
+
+        if (audio.currentTime >= events[currentEventIndex].time) {
+            const currentEvent = events[currentEventIndex];
+
+            if (currentEvent.type === 'lyric') {
+                // Показываем строчку песни
+                lyricsDisplay.style.opacity = 0;
+                setTimeout(() => {
+                    lyricsDisplay.textContent = currentEvent.text;
+                    lyricsDisplay.style.opacity = 1;
+                }, 300);
+            } 
+            else if (currentEvent.type === 'showLetter') {
+                // Показываем письмо
+                displayLetter();
+            }
             
-            // Ждем завершения анимации исчезновения, а потом меняем текст
-            setTimeout(() => {
-                lyricsDisplay.textContent = lyrics[currentLyricIndex].text;
-                lyricsDisplay.style.opacity = 1; // Делаем текст видимым
-                currentLyricIndex++;
-            }, 300); // 300 миллисекунд
+            currentEventIndex++;
         }
     });
 
-    // Когда песня закончится, можно показать финальное сообщение
-    audio.addEventListener('ended', function() {
-        lyricsDisplay.textContent = "Я тебя люблю ❤️";
-    });
+    // Функция для плавного перехода от текста песни к письму
+    function displayLetter() {
+        // Плавно прячем текст песни
+        lyricsContainer.style.opacity = 0;
+        setTimeout(() => {
+            lyricsContainer.style.display = 'none';
+        }, 500); // 0.5с
+
+        // Плавно показываем письмо
+        letterContainer.style.display = 'block';
+        setTimeout(() => {
+            letterContainer.style.opacity = 1;
+        }, 600);
+    }
 }
