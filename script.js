@@ -27,7 +27,6 @@ function checkPassword() {
 }
 
 // --- БЛОК АНАЛИЗА АУДИО ---
-
 let audioContext, analyser, audioSource, dataArray, bufferLength;
 let animationId = null;
 let currentPulseIntensity = 0;
@@ -41,10 +40,8 @@ function initAudioAnalyzer(audioElement) {
         audioContext = new (window.AudioContext || window.webkitAudioContext)();
         analyser = audioContext.createAnalyser();
         audioSource = audioContext.createMediaElementSource(audioElement);
-
         audioSource.connect(analyser);
         analyser.connect(audioContext.destination);
-
         analyser.fftSize = 256;
         bufferLength = analyser.frequencyBinCount;
         dataArray = new Uint8Array(bufferLength);
@@ -55,71 +52,56 @@ function initAudioAnalyzer(audioElement) {
 
 function analyzeAudioFeatures() {
     if (!analyser) return { rms: 0, isBeat: false };
-
     analyser.getByteFrequencyData(dataArray);
-
     let sum = 0;
     for (let i = 0; i < bufferLength; i++) {
         sum += dataArray[i] * dataArray[i];
     }
     const rms = Math.sqrt(sum / bufferLength) / 255;
-
     energyHistory.push(rms);
     if (energyHistory.length > 30) energyHistory.shift();
     energyAverage = energyHistory.reduce((a, b) => a + b, 0) / energyHistory.length;
-
     let isBeat = false;
     const currentTime = Date.now();
-    
     const threshold = energyAverage * 1.2 + 0.08; 
-
     if (rms > threshold && (currentTime - lastBeatTime) > 200) {
         isBeat = true;
         lastBeatTime = currentTime;
         currentPulseIntensity = 1.0;
     }
-
     if (currentPulseIntensity > 0) {
         currentPulseIntensity -= 0.07; 
     } else {
         currentPulseIntensity = 0;
     }
-    
     return { rms, isBeat };
 }
 
 function visualize() {
     const features = analyzeAudioFeatures();
-    
     const leftGlow = document.querySelector('.left-glow');
     const rightGlow = document.querySelector('.right-glow');
-
     if (leftGlow && rightGlow) {
         let opacity = 0.4 + features.rms * 1.2;
         let blur = 10 + features.rms * 40;
         let spread = 20 + features.rms * 50;
-
         if (features.isBeat) {
             opacity = 1.0;
             blur = 40 + currentPulseIntensity * 35;
             spread = 55 + currentPulseIntensity * 45;
         }
-
         const shadowStyle = `0 0 ${blur}px var(--accent-color), 0 0 ${spread}px var(--accent-color)`;
-        
         leftGlow.style.opacity = opacity;
         leftGlow.style.boxShadow = shadowStyle;
         rightGlow.style.opacity = opacity;
         rightGlow.style.boxShadow = shadowStyle;
     }
-
     animationId = requestAnimationFrame(visualize);
 }
 
 // --- КОНЕЦ БЛОКА АНАЛИЗА АУДИО ---
 
 function startValentine() {
-    // --- ССЫЛКИ НА ЭЛЕМЕНТЫ ---
     const audio = document.getElementById('player');
     const card = document.querySelector('.card');
     const image = document.querySelector('.card img');
@@ -128,8 +110,6 @@ function startValentine() {
     const ghostText = document.getElementById('ghost-text');
     const letterContainer = document.getElementById('letter-container');
     const visualizer = document.getElementById('beat-visualizer');
-    
-    // --- НОВЫЕ ССЫЛКИ НА ЭЛЕМЕНТЫ ПЛЕЕРА ---
     const playerContainer = document.getElementById('player-container');
     const playPauseBtn = document.getElementById('play-pause-btn');
     const playIcon = document.getElementById('play-icon');
@@ -145,16 +125,16 @@ function startValentine() {
     card.classList.add('lyrics-mode');
     image.style.opacity = 0;
     image.style.display = 'none';
-    audio.currentTime = 23;
+    
+    // ИЗМЕНЕНО: Новая точка старта и события для трека
+    audio.currentTime = 50;
 
     const events = [
-        { time: 23, type: 'lyric', text: "И я подонок, я изменщик,\nя gaslighter и абьюзер" },
-        { time: 27, type: 'lyric', text: "Я не нравлюсь твоей маме,\nда и хуй с ней" },
-        { time: 30, type: 'ghost', text: "(ну допустим)" },
-        { time: 31, type: 'lyric', text: "Детка, хватит мне уже давать\nпоследний шанс" },
-        { time: 34.5, type: 'ghost', text: "(ага)" },
-        { time: 35, type: 'lyric', text: "Счастье — это не для нас" },
-        { time: 38.5, type: 'showLetter' }
+        { time: 51, type: 'lyric', text: "Малыш, это последняя любовь" },
+        { time: 55, type: 'lyric', text: "Мне не нужны другие, только твой" },
+        { time: 59, type: 'lyric', text: "Запах на моей одежде" },
+        { time: 63, type: 'lyric', text: "Я вдыхаю его, и мне\nне становится легче" },
+        { time: 67, type: 'showLetter' }
     ];
 
     audio.volume = 0;
@@ -174,29 +154,26 @@ function startValentine() {
         if (!animationId) {
             visualize();
         }
-        updatePlayButton(); // Обновляем иконку
+        updatePlayButton();
     }, { once: true });
     
-    audio.addEventListener('pause', updatePlayButton); // Обновляем иконку при паузе
+    audio.addEventListener('pause', updatePlayButton);
 
     let fadeInInterval = setInterval(() => {
         if (audio.volume < 0.7) { 
             const newVolume = Math.min(0.7, audio.volume + 0.07);
             audio.volume = newVolume;
-            volumeSlider.value = newVolume; // Синхронизируем слайдер
+            volumeSlider.value = newVolume;
         } 
         else { clearInterval(fadeInInterval); }
     }, 100);
 
     let currentEventIndex = 0;
     audio.addEventListener('timeupdate', function() {
-        // Синхронизация прогресс-бара
         updateProgress();
-
         if (currentEventIndex >= events.length) return;
         if (audio.currentTime >= events[currentEventIndex].time) {
             const currentEvent = events[currentEventIndex];
-            
             if (currentEvent.type === 'lyric' || currentEvent.type === 'ghost') {
                 lyricsDisplay.style.opacity = 0;
                 ghostText.style.opacity = 0;
@@ -216,8 +193,6 @@ function startValentine() {
             currentEventIndex++;
         }
     });
-
-    // --- НОВЫЙ БЛОК: ЛОГИКА ПЛЕЕРА ---
 
     function formatTime(seconds) {
         const minutes = Math.floor(seconds / 60);
@@ -248,6 +223,10 @@ function startValentine() {
     function updateProgress() {
         progressBar.value = audio.currentTime;
         currentTimeDisplay.textContent = formatTime(audio.currentTime);
+
+        // ИЗМЕНЕНО: Обновляем CSS-переменную для закрашивания ползунка
+        const progressPercent = (audio.duration > 0) ? (audio.currentTime / audio.duration) * 100 : 0;
+        progressBar.style.setProperty('--progress-percent', `${progressPercent}%`);
     }
     
     audio.addEventListener('loadedmetadata', () => {
@@ -285,18 +264,15 @@ function startValentine() {
         }
         updateVolumeIcon();
     });
-
-    // --- КОНЕЦ ЛОГИКИ ПЛЕЕРА ---
     
     function displayLetter() {
         lyricsDisplay.style.opacity = 0;
         ghostText.style.opacity = 0;
-
         let volumeInterval = setInterval(() => {
             if (audio.volume < 1.0) { 
                 const newVolume = Math.min(1.0, audio.volume + 0.05);
                 audio.volume = newVolume;
-                volumeSlider.value = newVolume; // Синхронизируем слайдер
+                volumeSlider.value = newVolume;
             } 
             else { clearInterval(volumeInterval); }
         }, 50);
@@ -305,15 +281,12 @@ function startValentine() {
             lyricsContainer.style.display = 'none';
             card.classList.remove('lyrics-mode');
             image.style.display = 'block';
-            
-            // Показываем плеер и письмо
             playerContainer.style.display = 'block';
             letterContainer.style.display = 'block';
             visualizer.classList.add('visible');
-
             setTimeout(() => {
                 image.style.opacity = 1;
-                playerContainer.style.opacity = 1; // Плавное появление плеера
+                playerContainer.style.opacity = 1;
                 letterContainer.style.opacity = 1;
                 
                 const letterP = letterContainer.querySelector('p');
@@ -337,7 +310,6 @@ function startValentine() {
                         letterP.classList.add('finished-typing');
                     }
                 }
-                
                 typeWriter();
             }, 50);
         }, 300);
