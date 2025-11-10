@@ -1,4 +1,3 @@
-// ... (DOMContentLoaded и checkPassword остаются без изменений)
 document.addEventListener('DOMContentLoaded', () => {
     if (document.getElementById('password')) {
         // Логика для страницы входа
@@ -12,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 });
+
 function checkPassword() {
     const passwordInput = document.getElementById('password');
     const errorMessage = document.getElementById('error-message');
@@ -26,8 +26,8 @@ function checkPassword() {
     }
 }
 
+// --- БЛОК АНАЛИЗА АУДИО ---
 
-// ... (Блок анализа аудио остается без изменений)
 let audioContext, analyser, audioSource, dataArray, bufferLength;
 let animationId = null;
 let currentPulseIntensity = 0;
@@ -35,16 +35,93 @@ let lastBeatTime = 0;
 let energyHistory = [];
 let energyAverage = 0;
 
-function initAudioAnalyzer(audioElement) { /* ... */ }
-function analyzeAudioFeatures() { /* ... */ }
-function visualize() { /* ... */ }
+function initAudioAnalyzer(audioElement) {
+    if (audioContext) return;
+    try {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        analyser = audioContext.createAnalyser();
+        audioSource = audioContext.createMediaElementSource(audioElement);
 
+        audioSource.connect(analyser);
+        analyser.connect(audioContext.destination);
 
-// --- НАЧАЛО ОСНОВНОЙ ЛОГИКИ ---
+        analyser.fftSize = 256;
+        bufferLength = analyser.frequencyBinCount;
+        dataArray = new Uint8Array(bufferLength);
+    } catch (error) {
+        console.error("Не удалось инициализировать Web Audio API", error);
+    }
+}
 
-// Иконки для кнопки Play/Pause
-const playIconSVG = '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>';
-const pauseIconSVG = '<svg viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>';
+function analyzeAudioFeatures() {
+    if (!analyser) return { rms: 0, isBeat: false };
+
+    analyser.getByteFrequencyData(dataArray);
+
+    let sum = 0;
+    for (let i = 0; i < bufferLength; i++) {
+        sum += dataArray[i] * dataArray[i];
+    }
+    const rms = Math.sqrt(sum / bufferLength) / 255;
+
+    energyHistory.push(rms);
+    if (energyHistory.length > 30) energyHistory.shift();
+    energyAverage = energyHistory.reduce((a, b) => a + b, 0) / energyHistory.length;
+
+    let isBeat = false;
+    const currentTime = Date.now();
+    
+    // ИЗМЕНЕНО: Порог детектора битов снижен с 1.3 до 1.2 для большей чувствительности
+    const threshold = energyAverage * 1.2 + 0.08; 
+
+    // ИЗМЕНЕНО: Задержка между битами уменьшена с 300ms до 200ms для реакции на быстрые биты
+    if (rms > threshold && (currentTime - lastBeatTime) > 200) {
+        isBeat = true;
+        lastBeatTime = currentTime;
+        currentPulseIntensity = 1.0;
+    }
+
+    if (currentPulseIntensity > 0) {
+        // ИЗМЕНЕНО: Скорость затухания увеличена с 0.05 до 0.07 для более резких "вспышек"
+        currentPulseIntensity -= 0.07; 
+    } else {
+        currentPulseIntensity = 0;
+    }
+    
+    return { rms, isBeat };
+}
+
+function visualize() {
+    const features = analyzeAudioFeatures();
+    
+    const leftGlow = document.querySelector('.left-glow');
+    const rightGlow = document.querySelector('.right-glow');
+
+    if (leftGlow && rightGlow) {
+        // ИЗМЕНЕНО: Усилена базовая реакция на громкость (rms)
+        let opacity = 0.4 + features.rms * 1.2;
+        let blur = 10 + features.rms * 40;
+        let spread = 20 + features.rms * 50;
+
+        if (features.isBeat) {
+            // ИЗМЕНЕНО: Реакция на бит сделана ГОРАЗДО более мощной
+            opacity = 1.0;
+            blur = 40 + currentPulseIntensity * 35;
+            spread = 55 + currentPulseIntensity * 45;
+        }
+
+        const shadowStyle = `0 0 ${blur}px var(--accent-color), 0 0 ${spread}px var(--accent-color)`;
+        
+        leftGlow.style.opacity = opacity;
+        leftGlow.style.boxShadow = shadowStyle;
+        rightGlow.style.opacity = opacity;
+        rightGlow.style.boxShadow = shadowStyle;
+    }
+
+    animationId = requestAnimationFrame(visualize);
+}
+
+// --- КОНЕЦ БЛОКА АНАЛИЗА АУДИО ---
 
 function startValentine() {
     const audio = document.getElementById('player');
@@ -55,18 +132,12 @@ function startValentine() {
     const ghostText = document.getElementById('ghost-text');
     const letterContainer = document.getElementById('letter-container');
     const visualizer = document.getElementById('beat-visualizer');
-    
-    // НОВЫЕ ЭЛЕМЕНТЫ МИНИ-ПЛЕЕРА
-    const miniPlayer = document.getElementById('miniPlayer');
-    const miniPlayPauseBtn = document.getElementById('miniPlayPauseBtn');
-    const miniProgressBar = document.getElementById('miniProgressBar');
-    const miniProgress = document.getElementById('miniProgress');
 
-    // ... (остальной код до playPromise без изменений)
     card.classList.add('lyrics-mode');
     image.style.opacity = 0;
     image.style.display = 'none';
     audio.currentTime = 23;
+
     const events = [
         { time: 23, type: 'lyric', text: "И я подонок, я изменщик,\nя gaslighter и абьюзер" },
         { time: 27, type: 'lyric', text: "Я не нравлюсь твоей маме,\nда и хуй с ней" },
@@ -76,87 +147,100 @@ function startValentine() {
         { time: 35, type: 'lyric', text: "Счастье — это не для нас" },
         { time: 38.5, type: 'showLetter' }
     ];
-    audio.volume = 0;
-    const playPromise = audio.play();
-    playPromise.catch(error => { /* ... */ });
-    audio.addEventListener('play', () => { /* ... */ }, { once: true });
-    let fadeInInterval = setInterval(() => { /* ... */ }, 100);
 
-    // ОСНОВНОЙ ОБРАБОТЧИК ВРЕМЕНИ ДЛЯ СТРОК
-    let currentEventIndex = 0;
-    const lyricsTimeUpdater = () => {
-        if (currentEventIndex >= events.length) {
-            audio.removeEventListener('timeupdate', lyricsTimeUpdater); // Отключаем, когда строки закончились
-            return;
+    audio.volume = 0;
+    
+    const playPromise = audio.play();
+    playPromise.catch(error => {
+        lyricsDisplay.textContent = "Нажми, чтобы начать ♡";
+        document.body.addEventListener('click', () => { 
+            audio.play();
+        }, { once: true });
+    });
+
+    audio.addEventListener('play', () => {
+        initAudioAnalyzer(audio);
+        if (!animationId) {
+            visualize();
         }
+    }, { once: true });
+    
+    let fadeInInterval = setInterval(() => {
+        if (audio.volume < 0.7) { audio.volume = Math.min(0.7, audio.volume + 0.07); } 
+        else { clearInterval(fadeInInterval); }
+    }, 100);
+
+    let currentEventIndex = 0;
+    audio.addEventListener('timeupdate', function() {
+        if (currentEventIndex >= events.length) return;
         if (audio.currentTime >= events[currentEventIndex].time) {
             const currentEvent = events[currentEventIndex];
-            if (currentEvent.type === 'lyric' || currentEvent.type === 'ghost') { /* ... */ } 
-            else if (currentEvent.type === 'showLetter') { displayLetter(); }
+            
+            if (currentEvent.type === 'lyric' || currentEvent.type === 'ghost') {
+                lyricsDisplay.style.opacity = 0;
+                ghostText.style.opacity = 0;
+                setTimeout(() => {
+                    if (currentEvent.type === 'lyric') {
+                        lyricsDisplay.innerText = currentEvent.text;
+                        lyricsDisplay.style.opacity = 1;
+                    } else {
+                        ghostText.innerText = currentEvent.text;
+                        ghostText.style.opacity = 1;
+                    }
+                }, 200);
+            }
+            else if (currentEvent.type === 'showLetter') {
+                displayLetter();
+            }
             currentEventIndex++;
         }
-    };
-    audio.addEventListener('timeupdate', lyricsTimeUpdater);
-
-    // НОВЫЙ ОБРАБОТЧИК ВРЕМЕНИ ДЛЯ ПРОГРЕСС-БАРА (работает всегда)
-    const progressUpdater = () => {
-        if (audio.duration) {
-            const progressPercent = (audio.currentTime / audio.duration) * 100;
-            miniProgress.style.width = `${progressPercent}%`;
-        }
-    };
-    audio.addEventListener('timeupdate', progressUpdater);
-
-    // НОВЫЕ ОБРАБОТЧИКИ ДЛЯ СИНХРОНИЗАЦИИ КНОПКИ
-    audio.addEventListener('play', () => {
-        miniPlayPauseBtn.innerHTML = pauseIconSVG;
     });
-    audio.addEventListener('pause', () => {
-        miniPlayPauseBtn.innerHTML = playIconSVG;
-    });
-
-    // НОВЫЕ ОБРАБОТЧИКИ КЛИКОВ ДЛЯ МИНИ-ПЛЕЕРА
-    miniPlayPauseBtn.addEventListener('click', () => {
-        if (audio.paused) {
-            audio.play();
-        } else {
-            audio.pause();
-        }
-    });
-
-    miniProgressBar.addEventListener('click', (e) => {
-        if (audio.duration) {
-            const barWidth = miniProgressBar.clientWidth;
-            const clickX = e.offsetX;
-            audio.currentTime = (clickX / barWidth) * audio.duration;
-        }
-    });
-
+    
     function displayLetter() {
         lyricsDisplay.style.opacity = 0;
         ghostText.style.opacity = 0;
-        let volumeInterval = setInterval(() => { /* ... */ }, 50);
+
+        let volumeInterval = setInterval(() => {
+            if (audio.volume < 1.0) { audio.volume = Math.min(1.0, audio.volume + 0.05); } 
+            else { clearInterval(volumeInterval); }
+        }, 50);
 
         setTimeout(() => {
             lyricsContainer.style.display = 'none';
             card.classList.remove('lyrics-mode');
             image.style.display = 'block';
             letterContainer.style.display = 'block';
+            
             visualizer.classList.add('visible');
 
-            // ПОКАЗЫВАЕМ МИНИ-ПЛЕЕР
-            miniPlayer.style.display = 'flex';
             setTimeout(() => {
                 image.style.opacity = 1;
                 letterContainer.style.opacity = 1;
-                miniPlayer.style.opacity = 1; // Делаем его видимым
+                
+                const letterP = letterContainer.querySelector('p');
+                const fullText = `Ты сказала "забить". Я пытался. Не вышло.<br><br>Назвать тебя Спящей Красавицей — ирония, ведь ты вообще не даешь мне спать.<br><br>И хватит себя ругать. Ты даже не представляешь, насколько ты крутая, даже со всеми своими "сложностями". Я вижу твой свет, даже когда ты сама его не замечаешь.<br><br>Понятия не имею, что будет дальше. Знаю только одно: я всё ещё здесь.<br><br><b>Bagerca для Fasil</b>`;
+                letterP.innerHTML = ''; 
+                
+                let i = 0;
+                function typeWriter() {
+                    if (i < fullText.length) {
+                        if (fullText.charAt(i) === '<') {
+                            const closingTagIndex = fullText.indexOf('>', i);
+                            const tag = fullText.substring(i, closingTagIndex + 1);
+                            letterP.innerHTML += tag;
+                            i = closingTagIndex + 1;
+                        } else {
+                            letterP.innerHTML += fullText.charAt(i);
+                            i++;
+                        }
+                        setTimeout(typeWriter, 55); 
+                    } else {
+                        letterP.classList.add('finished-typing');
+                    }
+                }
+                
+                typeWriter();
             }, 50);
-
-            // ... (остальной код с печатной машинкой)
-            const letterP = letterContainer.querySelector('p');
-            const fullText = `...`; // Ваш текст письма
-            typeWriter(); // Вызов функции
-            
         }, 300);
     }
 }
