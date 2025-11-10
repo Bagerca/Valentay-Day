@@ -57,7 +57,7 @@ function startValentine() {
         document.body.addEventListener('click', () => { audio.play(); }, { once: true });
     });
 
-    visualizer.classList.add('visible');
+    // ИСПРАВЛЕНО: Строка visualizer.classList.add('visible'); отсюда УБРАНА.
 
     let fadeInInterval = setInterval(() => {
         if (audio.volume < 0.7) { audio.volume = Math.min(0.7, audio.volume + 0.07); } 
@@ -92,7 +92,7 @@ function startValentine() {
     });
     
     function displayLetter() {
-        visualizer.classList.remove('visible');
+        // ИСПРАВЛЕНО: Строка visualizer.classList.remove('visible'); отсюда УБРАНА.
         
         lyricsDisplay.style.opacity = 0;
         ghostText.style.opacity = 0;
@@ -107,6 +107,9 @@ function startValentine() {
             card.classList.remove('lyrics-mode');
             image.style.display = 'block';
             letterContainer.style.display = 'block';
+            
+            // ИСПРАВЛЕНО: Визуализатор теперь появляется вместе с письмом.
+            visualizer.classList.add('visible');
 
             setTimeout(() => {
                 image.style.opacity = 1;
