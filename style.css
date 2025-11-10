@@ -39,7 +39,7 @@ body {
     box-shadow: none;
 }
 
-/* --- Стили для страницы входа --- */
+/* --- Стили для страницы входа (без изменений) --- */
 .login-container h1 { color: #f0f0f0; font-size: 1.8em; margin-bottom: 25px; }
 .notification { background-color: #2b2b2b; border: 1px solid #dc143c; padding: 15px; border-radius: 10px; margin-bottom: 25px; color: #f0f0f0; }
 input[type="password"] { width: 100%; padding: 12px; margin-bottom: 20px; border: 1px solid #555; border-radius: 8px; box-sizing: border-box; font-size: 1em; text-align: center; background-color: #121212; color: #f0f0f0; transition: all 0.3s ease; }
@@ -48,99 +48,22 @@ button { padding: 12px 30px; border: none; background-color: #dc143c; color: whi
 button:hover { background-color: white; color: #dc143c; }
 .error { color: #ff4d4d; margin-top: 15px; height: 20px; font-weight: bold; }
 
-/* --- Стили для основной страницы валентинки --- */
+/* --- Стили для основной страницы (без изменений) --- */
 .card img { max-width: 100%; height: auto; border-radius: 15px; margin-bottom: 20px; border: 2px solid #444; transition: opacity 0.5s ease-in-out; }
+#lyrics-container { position: relative; display: flex; justify-content: center; align-items: center; min-height: 250px; }
+.card.lyrics-mode #lyrics-container { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 10; }
+#lyrics { font-family: 'Oswald', sans-serif; font-size: clamp(2.5em, 6vw, 4.5em); font-weight: 700; line-height: 1.2; color: #dc143c; text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 0 15px rgba(220, 20, 60, 0.7); transition: opacity 0.2s ease-in-out; white-space: pre-wrap; text-align: center; position: absolute; opacity: 0; }
+#ghost-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 100%; text-align: center; font-family: 'Oswald', sans-serif; font-size: clamp(6em, 14vw, 15em); font-weight: 700; color: transparent; -webkit-text-stroke: 2px #dc143c; text-shadow: 0 0 10px rgba(220, 20, 60, 0.5); opacity: 0; transition: opacity 0.2s ease-in-out; white-space: nowrap; }
 
-#lyrics-container {
-    position: relative;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 250px;
-}
+/* --- Стили для письма (без изменений) --- */
+#letter-container { display: none; opacity: 0; transition: opacity 0.5s ease-in-out 0.3s; text-align: left; }
+#letter-container h2 { color: #f0f0f0; text-align: center; margin-bottom: 20px; font-weight: 700; }
+#letter-container p { color: #ccc; line-height: 1.7; font-size: 1.1em; font-weight: 400; }
+#letter-container p::after { content: '▋'; animation: blink 1s step-end infinite; margin-left: 2px; color: #f0f0f0; }
+@keyframes blink { from, to { color: transparent; } 50% { color: #f0f0f0; } }
+#letter-container p.finished-typing::after { content: ''; animation: none; }
 
-.card.lyrics-mode #lyrics-container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    z-index: 10;
-}
-
-#lyrics {
-    font-family: 'Oswald', sans-serif;
-    font-size: clamp(2.5em, 6vw, 4.5em);
-    font-weight: 700;
-    line-height: 1.2;
-    color: #dc143c;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    text-shadow: 0 0 15px rgba(220, 20, 60, 0.7);
-    transition: opacity 0.2s ease-in-out;
-    white-space: pre-wrap;
-    text-align: center;
-    position: absolute;
-    opacity: 0;
-}
-
-#ghost-text {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 100%;
-    text-align: center;
-    font-family: 'Oswald', sans-serif;
-    font-size: clamp(6em, 14vw, 15em);
-    font-weight: 700;
-    color: transparent;
-    -webkit-text-stroke: 2px #dc143c;
-    text-shadow: 0 0 10px rgba(220, 20, 60, 0.5);
-    opacity: 0;
-    transition: opacity 0.2s ease-in-out;
-    white-space: nowrap;
-}
-
-/* --- Стили для письма --- */
-#letter-container { 
-    display: none; 
-    opacity: 0; 
-    transition: opacity 0.5s ease-in-out 0.3s; 
-    text-align: left; 
-}
-#letter-container h2 { 
-    color: #f0f0f0; 
-    text-align: center; 
-    margin-bottom: 20px; 
-    font-weight: 700; 
-}
-#letter-container p { 
-    color: #ccc; 
-    line-height: 1.7; 
-    font-size: 1.1em; 
-    font-weight: 400; 
-}
-
-/* --- Стили для эффекта печатной машинки --- */
-#letter-container p::after {
-    content: '▋';
-    animation: blink 1s step-end infinite;
-    margin-left: 2px;
-    color: #f0f0f0;
-}
-
-@keyframes blink {
-    from, to { color: transparent; }
-    50% { color: #f0f0f0; }
-}
-
-#letter-container p.finished-typing::after {
-    content: '';
-    animation: none;
-}
-
-/* --- Стили для боковых неоновых линий --- */
+/* --- СТИЛИ ДЛЯ БОКОВЫХ НЕОНОВЫХ ЛИНИЙ --- */
 #beat-visualizer {
     position: fixed;
     top: 0;
@@ -161,11 +84,16 @@ button:hover { background-color: white; color: #dc143c; }
 
 .edge-glow {
     position: absolute;
-    --accent-color: #dc143c;
+    --accent-color: #dc143c; 
+    
+    /* ИЗМЕНЕНО: Добавляем transform в transition для плавной анимации роста */
     transition: opacity 0.1s ease-out, box-shadow 0.1s ease-out, transform 0.8s cubic-bezier(0.165, 0.84, 0.44, 1);
+    
+    /* ИЗМЕНЕНО: Задаем начальное состояние - линия "сжата" по вертикали */
     transform: scaleY(0);
 }
 
+/* ИЗМЕНЕНО: Когда контейнер становится видимым, линия "вырастает" до полного размера */
 #beat-visualizer.visible .edge-glow {
     transform: scaleY(1);
 }
@@ -184,63 +112,4 @@ button:hover { background-color: white; color: #dc143c; }
     width: 4px;
     height: 100%;
     background: linear-gradient(180deg, transparent, var(--accent-color), transparent);
-}
-
-/* --- Стили для мини-плеера --- */
-.mini-player {
-    display: none; /* Изначально скрыт */
-    opacity: 0;
-    width: 100%;
-    margin-bottom: 30px; /* Отступ от заголовка письма */
-    background: rgba(0, 0, 0, 0.25);
-    border-radius: 12px;
-    padding: 12px 15px;
-    display: flex; /* Переносим flex сюда, чтобы JS его не перезаписывал */
-    align-items: center;
-    gap: 15px;
-    transition: opacity 0.5s ease-in-out 0.3s; /* Появляется вместе с письмом */
-}
-
-.mini-control-btn {
-    background: transparent;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: white;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    flex-shrink: 0; /* Чтобы кнопка не сжималась */
-    padding: 0;
-}
-
-.mini-control-btn:hover {
-    background: rgba(220, 20, 60, 0.5);
-    border-color: #dc143c;
-}
-
-.mini-control-btn svg {
-    width: 20px;
-    height: 20px;
-    fill: currentColor;
-}
-
-.mini-progress-bar {
-    flex-grow: 1; /* Занимает все оставшееся место */
-    height: 6px;
-    background: rgba(0, 0, 0, 0.4);
-    border-radius: 10px;
-    cursor: pointer;
-    overflow: hidden;
-}
-
-.mini-progress {
-    height: 100%;
-    width: 0%;
-    background: #dc143c;
-    border-radius: 10px;
-    transition: width 0.1s linear; /* Плавное обновление полосы */
 }
