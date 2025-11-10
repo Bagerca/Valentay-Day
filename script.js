@@ -55,6 +55,10 @@ function startValentine() {
         lyricsDisplay.textContent = "Нажми, чтобы начать ♡";
         document.body.addEventListener('click', () => { audio.play(); }, { once: true });
     });
+    
+    // --- ИЗМЕНЕНО: Добавляем класс для пульсации ---
+    // Но не на саму карточку в lyrics-mode, а на body, чтобы создать общий эффект
+    document.body.classList.add('pulsing'); // Используем body для глобального эффекта
 
     let fadeInInterval = setInterval(() => {
         if (audio.volume < 0.7) { audio.volume = Math.min(0.7, audio.volume + 0.07); } 
@@ -67,15 +71,11 @@ function startValentine() {
         if (audio.currentTime >= events[currentEventIndex].time) {
             const currentEvent = events[currentEventIndex];
             
-            // ИЗМЕНЕНО: Возвращаем логику плавного перехода
             if (currentEvent.type === 'lyric' || currentEvent.type === 'ghost') {
-                // 1. Сначала всё прячем
                 lyricsDisplay.style.opacity = 0;
                 ghostText.style.opacity = 0;
 
-                // 2. Ждем, пока анимация затухания закончится (200мс из CSS)
                 setTimeout(() => {
-                    // 3. Меняем текст и показываем нужный элемент
                     if (currentEvent.type === 'lyric') {
                         lyricsDisplay.innerText = currentEvent.text;
                         lyricsDisplay.style.opacity = 1;
@@ -83,7 +83,7 @@ function startValentine() {
                         ghostText.innerText = currentEvent.text;
                         ghostText.style.opacity = 1;
                     }
-                }, 200); // Эта задержка создает "паузу" и плавность
+                }, 200);
             }
             else if (currentEvent.type === 'showLetter') {
                 displayLetter();
@@ -91,8 +91,12 @@ function startValentine() {
             currentEventIndex++;
         }
     });
-
+    
+    // --- НОВАЯ ВЕРСИЯ ФУНКЦИИ displayLetter ---
     function displayLetter() {
+        // --- ИЗМЕНЕНО: Убираем пульсацию ---
+        document.body.classList.remove('pulsing');
+        
         lyricsDisplay.style.opacity = 0;
         ghostText.style.opacity = 0;
 
@@ -106,9 +110,38 @@ function startValentine() {
             card.classList.remove('lyrics-mode');
             image.style.display = 'block';
             letterContainer.style.display = 'block';
+
             setTimeout(() => {
                 image.style.opacity = 1;
                 letterContainer.style.opacity = 1;
+                
+                // --- ЛОГИКА ПЕЧАТНОЙ МАШИНКИ ---
+                const letterP = letterContainer.querySelector('p');
+                const fullText = `Ты сказала "забить". Я пытался. Не вышло.<br><br>Назвать тебя Спящей Красавицей — ирония, ведь ты вообще не даешь мне спать.<br><br>И хватит себя ругать. Ты даже не представляешь, насколько ты крутая, даже со всеми своими "сложностями". Я вижу твой свет, даже когда ты сама его не замечаешь.<br><br>Понятия не имею, что будет дальше. Знаю только одно: я всё ещё здесь.<br><br><b>Bagerca для Fasil</b>`;
+                letterP.innerHTML = ''; // Очищаем параграф
+                
+                let i = 0;
+                function typeWriter() {
+                    if (i < fullText.length) {
+                        // Проверяем, не начинается ли HTML-тег
+                        if (fullText.charAt(i) === '<') {
+                            const closingTagIndex = fullText.indexOf('>', i);
+                            const tag = fullText.substring(i, closingTagIndex + 1);
+                            letterP.innerHTML += tag;
+                            i = closingTagIndex + 1;
+                        } else {
+                            letterP.innerHTML += fullText.charAt(i);
+                            i++;
+                        }
+                        setTimeout(typeWriter, 55); // Скорость печати (в миллисекундах)
+                    } else {
+                        // Убираем курсор после завершения печати
+                        letterP.classList.add('finished-typing');
+                    }
+                }
+                
+                typeWriter();
+
             }, 50);
         }, 300);
     }
