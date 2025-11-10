@@ -59,19 +59,17 @@ button:hover { background-color: white; color: #dc143c; }
     min-height: 250px;
 }
 
-/* ИЗМЕНЕНО: Заставляем контейнер "выпрыгнуть" из карточки в режиме показа строк */
 .card.lyrics-mode #lyrics-container {
     position: fixed;
     top: 0;
     left: 0;
-    width: 100vw; /* Занимает 100% ширины ОКНА */
-    height: 100vh; /* Занимает 100% высоты ОКНА */
+    width: 100vw;
+    height: 100vh;
     z-index: 10;
 }
 
 #lyrics {
     font-family: 'Oswald', sans-serif;
-    /* ИЗМЕНЕНО: Адаптивный шрифт с ограничениями */
     font-size: clamp(2.5em, 6vw, 4.5em);
     font-weight: 700;
     line-height: 1.2;
@@ -94,14 +92,19 @@ button:hover { background-color: white; color: #dc143c; }
     width: 100%;
     text-align: center;
     font-family: 'Oswald', sans-serif;
-    /* ИЗМЕНЕНО: Адаптивный шрифт с ограничениями */
     font-size: clamp(6em, 14vw, 15em);
     font-weight: 700;
-    color: transparent; /* Убираем заливку, оставляем только обводку */
-    -webkit-text-stroke: 1px #dc143c;
+    color: transparent;
+    
+    /* --- ИЗМЕНЕНИЯ ЗДЕСЬ --- */
+    /* 1. Делаем обводку в два раза жирнее */
+    -webkit-text-stroke: 2px #dc143c;
+    /* 2. Добавляем мягкую тень для сглаживания и "неонового" эффекта */
+    text-shadow: 0 0 10px rgba(220, 20, 60, 0.5);
+
     opacity: 0;
     transition: opacity 0.2s ease-in-out;
-    white-space: nowrap; /* ИЗМЕНЕНО: Запрещаем перенос строки для этого текста */
+    white-space: nowrap;
 }
 
 /* --- Стили для письма --- */
