@@ -4,9 +4,8 @@ document.addEventListener('DOMContentLoaded', () => {
     } 
     else if (document.getElementById('player')) {
         const isVerified = sessionStorage.getItem('isVerified');
-        if (isVerified !== 'true') {
-            window.location.href = 'index.html';
-        } else {
+        if (isVerified !== 'true') { window.location.href = 'index.html'; } 
+        else {
             startValentine();
             sessionStorage.removeItem('isVerified');
         }
@@ -33,30 +32,37 @@ function startValentine() {
     const image = document.querySelector('.card img');
     const lyricsContainer = document.getElementById('lyrics-container');
     const lyricsDisplay = document.getElementById('lyrics');
-    const letterContainer = document.getElementById('letter-container');
-    
-    // --- ИЗМЕНЕНО: Управление визуалом и громкостью ---
+    const ghostText = document.getElementById('ghost-text'); // Находим новый элемент
+
     card.classList.add('lyrics-mode');
     image.style.opacity = 0;
     image.style.display = 'none';
-    audio.volume = 0.7; // Устанавливаем громкость на 70%
     audio.currentTime = 23;
 
+    // ИЗМЕНЕНО: Добавляем \n для переноса строк и свойство ghost для "призрачного" текста
     const events = [
-        { time: 23, text: "И я подонок, я изменщик, я gaslighter и абьюзер", type: 'lyric' },
-        { time: 27, text: "Я не нравлюсь твоей маме, да и хуй с ней", type: 'lyric' },
-        { time: 31, text: "Детка, хватит мне уже давать последний шанс", type: 'lyric' },
+        { time: 23, text: "И я подонок, я изменщик,\nя gaslighter и абьюзер", type: 'lyric' },
+        { time: 27, text: "Я не нравлюсь твоей маме,\nда и хуй с ней", type: 'lyric', ghost: "(ну допустим)" },
+        { time: 31, text: "Детка, хватит мне уже давать\nпоследний шанс", type: 'lyric', ghost: "(ага)"},
         { time: 35, text: "Счастье — это не для нас", type: 'lyric' },
-        { time: 39, type: 'showLetter' } 
+        { time: 38.5, type: 'showLetter' } // ИЗМЕНЕНО: Ускоряем появление письма
     ];
 
+    // ИЗМЕНЕНО: Логика плавного старта звука
+    audio.volume = 0; // Начинаем с тишины
     audio.play().catch(error => {
         lyricsDisplay.textContent = "Нажми, чтобы начать ♡";
-        document.body.addEventListener('click', () => {
-            audio.currentTime = 23;
-            audio.play();
-        }, { once: true });
+        document.body.addEventListener('click', () => { audio.play(); }, { once: true });
     });
+
+    // Плавно увеличиваем громкость до 70% за 1 секунду
+    let fadeInInterval = setInterval(() => {
+        if (audio.volume < 0.7) {
+            audio.volume = Math.min(0.7, audio.volume + 0.07);
+        } else {
+            clearInterval(fadeInInterval);
+        }
+    }, 100);
 
     let currentEventIndex = 0;
     audio.addEventListener('timeupdate', function() {
@@ -65,9 +71,14 @@ function startValentine() {
             const currentEvent = events[currentEventIndex];
             if (currentEvent.type === 'lyric') {
                 lyricsDisplay.style.opacity = 0;
+                ghostText.style.opacity = 0; // Прячем "призрак" перед сменой основной строки
                 setTimeout(() => {
-                    lyricsDisplay.textContent = currentEvent.text;
+                    lyricsDisplay.innerText = currentEvent.text; // innerText правильно обработает \n
                     lyricsDisplay.style.opacity = 1;
+                    if (currentEvent.ghost) {
+                        ghostText.innerText = currentEvent.ghost;
+                        ghostText.style.opacity = 1;
+                    }
                 }, 200);
             } 
             else if (currentEvent.type === 'showLetter') {
@@ -78,35 +89,24 @@ function startValentine() {
     });
 
     function displayLetter() {
-        // --- ИЗМЕНЕНО: НОВАЯ ЛОГИКА ПЕРЕХОДА ---
-        // 1. Плавно прячем текст песни
+        // ИЗМЕНЕНО: Новая, быстрая и плавная логика перехода
         lyricsContainer.style.opacity = 0;
+        ghostText.style.opacity = 0;
 
-        // 2. Начинаем плавно увеличивать громкость до 100%
         let volumeInterval = setInterval(() => {
-            if (audio.volume < 1.0) {
-                // Math.min, чтобы случайно не превысить 1.0
-                audio.volume = Math.min(1.0, audio.volume + 0.02);
-            } else {
-                clearInterval(volumeInterval);
-            }
-        }, 50); // Увеличиваем громкость каждые 50мс
+            if (audio.volume < 1.0) { audio.volume = Math.min(1.0, audio.volume + 0.05); } 
+            else { clearInterval(volumeInterval); }
+        }, 50);
 
-        // 3. Через полсекунды после исчезновения текста начинаем показывать фон
         setTimeout(() => {
-            lyricsContainer.style.display = 'none'; // Убираем окончательно
-            card.classList.remove('lyrics-mode'); // Запускает плавное появление фона
-            
-            // 4. Показываем картинку и письмо уже ВНУТРИ появившегося фона
+            lyricsContainer.style.display = 'none';
+            card.classList.remove('lyrics-mode');
             image.style.display = 'block';
             letterContainer.style.display = 'block';
-            
-            // Небольшая задержка для срабатывания display, затем включаем opacity
             setTimeout(() => {
                 image.style.opacity = 1;
                 letterContainer.style.opacity = 1;
-            }, 100);
-
-        }, 500); // 500ms = 0.5s
+            }, 50);
+        }, 300); // ИЗМЕНЕНО: Уменьшили задержку
     }
 }
