@@ -5,40 +5,45 @@ body {
     align-items: center;
     height: 100vh;
     margin: 0;
-    background-color: #1a1a1a; /* Глубокий графитовый фон */
+    background-color: #1a1a1a;
     font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif;
-    color: #f0f0f0; /* Светло-серый текст для читаемости */
+    color: #f0f0f0;
 }
 
 /* --- Стили для контейнеров --- */
 .card, .login-container {
-    background-color: #2b2b2b; /* Темно-серый фон для карточки */
+    background-color: #2b2b2b;
     padding: 40px 50px;
     border-radius: 15px;
-    box-shadow: 0 0 25px rgba(220, 20, 60, 0.4); /* Алое свечение */
+    box-shadow: 0 0 25px rgba(220, 20, 60, 0.4);
     border: 1px solid #444;
     text-align: center;
     max-width: 500px;
     width: 90%;
+    transition: all 0.5s ease-in-out; /* Плавный переход для фона */
+}
+
+/* Новый класс, который делает фон невидимым */
+.card.lyrics-mode {
+    background-color: transparent;
+    border: none;
+    box-shadow: none;
 }
 
 /* --- Стили для страницы входа --- */
-
 .login-container h1 {
     color: #f0f0f0;
     font-size: 1.8em;
     margin-bottom: 25px;
 }
-
 .notification {
     background-color: #333;
-    border: 1px solid #dc143c; /* Алая рамка */
+    border: 1px solid #dc143c;
     padding: 15px;
     border-radius: 10px;
     margin-bottom: 25px;
     color: #f0f0f0;
 }
-
 input[type="password"] {
     width: 100%;
     padding: 12px;
@@ -48,21 +53,19 @@ input[type="password"] {
     box-sizing: border-box;
     font-size: 1em;
     text-align: center;
-    background-color: #1a1a1a; /* Такой же, как фон */
+    background-color: #1a1a1a;
     color: #f0f0f0;
     transition: all 0.3s ease;
 }
-
 input[type="password"]:focus {
     outline: none;
-    border-color: #dc143c; /* Алая подсветка при фокусе */
+    border-color: #dc143c;
     box-shadow: 0 0 10px rgba(220, 20, 60, 0.5);
 }
-
 button {
     padding: 12px 30px;
     border: none;
-    background-color: #dc143c; /* Алый цвет */
+    background-color: #dc143c;
     color: white;
     border-radius: 8px;
     cursor: pointer;
@@ -70,60 +73,55 @@ button {
     font-weight: bold;
     transition: all 0.3s ease;
 }
-
 button:hover {
     background-color: white;
-    color: #dc143c; /* Инверсия цветов при наведении */
+    color: #dc143c;
 }
-
 .error {
-    color: #ff4d4d; /* Ярко-красный для ошибки */
+    color: #ff4d4d;
     margin-top: 15px;
     height: 20px;
     font-weight: bold;
 }
 
 /* --- Стили для основной страницы валентинки --- */
-
 .card img {
     max-width: 100%;
     height: auto;
     border-radius: 15px;
     margin-bottom: 20px;
     border: 2px solid #444;
+    transition: opacity 0.5s ease-in-out; /* Плавное исчезновение */
 }
-
 #lyrics-container {
     transition: opacity 0.5s ease-in-out;
 }
-
 #lyrics {
-    font-size: 2.2em;
-    font-weight: bold;
-    color: #dc143c; /* Алый текст песни */
+    font-family: 'Sedgwick Ave Display', cursive; /* Применяем новый шрифт */
+    font-size: 3.5em; /* Увеличиваем шрифт, так как он теперь главный элемент */
+    font-weight: normal; /* Для кастомных шрифтов лучше normal */
+    color: #dc143c;
     min-height: 120px;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: opacity 0.3s ease-in-out;
+    text-shadow: 0 0 10px rgba(220, 20, 60, 0.7); /* Добавляем тексту свечение */
+    transition: opacity 0.15s ease-in-out; /* Более резкая анимация */
 }
-
 /* --- Стили для письма --- */
 #letter-container {
-    display: none; /* Изначально скрыто */
-    opacity: 0;    /* Изначально прозрачно */
+    display: none;
+    opacity: 0;
     transition: opacity 0.8s ease-in-out;
-    text-align: left; /* Выравнивание по левому краю для читаемости */
+    text-align: left;
 }
-
 #letter-container h2 {
     color: #f0f0f0;
     text-align: center;
     margin-bottom: 20px;
 }
-
 #letter-container p {
     color: #ccc;
-    line-height: 1.6; /* Увеличенный межстрочный интервал */
+    line-height: 1.6;
     font-size: 1.1em;
 }
