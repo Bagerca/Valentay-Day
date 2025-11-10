@@ -63,7 +63,7 @@ button:hover { background-color: white; color: #dc143c; }
 @keyframes blink { from, to { color: transparent; } 50% { color: #f0f0f0; } }
 #letter-container p.finished-typing::after { content: ''; animation: none; }
 
-/* --- ИЗМЕНЕНО: СТИЛИ ДЛЯ БОКОВЫХ НЕОНОВЫХ ЛИНИЙ --- */
+/* --- СТИЛИ ДЛЯ БОКОВЫХ НЕОНОВЫХ ЛИНИЙ --- */
 #beat-visualizer {
     position: fixed;
     top: 0;
@@ -85,8 +85,17 @@ button:hover { background-color: white; color: #dc143c; }
 .edge-glow {
     position: absolute;
     --accent-color: #dc143c; 
-    /* ИЗМЕНЕНО: Анимация удалена, добавлен transition для плавности */
-    transition: opacity 0.1s ease-out, box-shadow 0.1s ease-out;
+    
+    /* ИЗМЕНЕНО: Добавляем transform в transition для плавной анимации роста */
+    transition: opacity 0.1s ease-out, box-shadow 0.1s ease-out, transform 0.8s cubic-bezier(0.165, 0.84, 0.44, 1);
+    
+    /* ИЗМЕНЕНО: Задаем начальное состояние - линия "сжата" по вертикали */
+    transform: scaleY(0);
+}
+
+/* ИЗМЕНЕНО: Когда контейнер становится видимым, линия "вырастает" до полного размера */
+#beat-visualizer.visible .edge-glow {
+    transform: scaleY(1);
 }
 
 .left-glow {
@@ -104,5 +113,3 @@ button:hover { background-color: white; color: #dc143c; }
     height: 100%;
     background: linear-gradient(180deg, transparent, var(--accent-color), transparent);
 }
-
-/* Ключевые кадры @keyframes edgePulse БОЛЬШЕ НЕ НУЖНЫ, их можно удалить */
