@@ -125,7 +125,7 @@ button:hover { background-color: white; color: #dc143c; }
     animation: none;
 }
 
-/* --- ИСПРАВЛЕНО: СТИЛИ ДЛЯ БОКОВОГО СВЕЧЕНИЯ --- */
+/* --- ИЗМЕНЕНО: СТИЛИ ДЛЯ БОКОВЫХ НЕОНОВЫХ ЛИНИЙ (из проекта плеера) --- */
 #beat-visualizer {
     position: fixed;
     top: 0;
@@ -136,7 +136,7 @@ button:hover { background-color: white; color: #dc143c; }
     pointer-events: none;
     display: none;
     opacity: 0;
-    transition: opacity 0.8s ease-in-out; /* Более плавное появление */
+    transition: opacity 0.8s ease-in-out;
 }
 
 #beat-visualizer.visible {
@@ -144,37 +144,37 @@ button:hover { background-color: white; color: #dc143c; }
     opacity: 1;
 }
 
-.beat-bar {
+.edge-glow {
     position: absolute;
+    opacity: 0;
+    /* Цвет взят из стилей валентинки */
+    --accent-color: #dc143c; 
+    animation: edgePulse 3s infinite ease-in-out;
+}
+
+.left-glow {
     top: 0;
-    width: 80px; /* ИСПРАВЛЕНО: толщина стала меньше */
+    left: 0;
+    width: 4px;
     height: 100%;
-    
-    /* ИСПРАВЛЕНО: градиент стал более резким для тонкой линии */
-    background: radial-gradient(ellipse at center, 
-        rgba(220, 20, 60, 0.35) 0%, 
-        rgba(220, 20, 60, 0) 60%
-    );
-    
-    /* ИСПРАВЛЕНО: анимация заменена на плавную пульсацию */
-    animation: subtleGlow 3s infinite ease-in-out;
+    background: linear-gradient(180deg, transparent, var(--accent-color), transparent);
 }
 
-.beat-bar.left {
-    left: 0; /* ИСПРАВЛЕНО: убран transform для ровного расположения */
+.right-glow {
+    top: 0;
+    right: 0;
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(180deg, transparent, var(--accent-color), transparent);
 }
 
-.beat-bar.right {
-    right: 0; /* ИСПРАВЛЕНО: убран transform для ровного расположения */
-}
-
-/* ИСПРАВЛЕНО: Новая анимация для мягкого свечения */
-@keyframes subtleGlow {
+@keyframes edgePulse {
     0%, 100% {
         opacity: 0.7;
+        box-shadow: 0 0 15px var(--accent-color), 0 0 25px var(--accent-color);
     }
     50% {
         opacity: 1;
-        transform: scale(1.05); /* Легкое "дыхание" */
+        box-shadow: 0 0 25px var(--accent-color), 0 0 40px var(--accent-color);
     }
 }
