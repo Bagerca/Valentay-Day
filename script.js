@@ -1,327 +1,265 @@
-document.addEventListener('DOMContentLoaded', () => {
-    if (document.getElementById('password')) {
-        // Логика для страницы входа
-    } 
-    else if (document.getElementById('player')) {
-        const isVerified = sessionStorage.getItem('isVerified');
-        if (isVerified !== 'true') { window.location.href = 'index.html'; } 
-        else {
-            startValentine();
-            sessionStorage.removeItem('isVerified');
-        }
-    }
-});
-
-function checkPassword() {
-    const passwordInput = document.getElementById('password');
-    const errorMessage = document.getElementById('error-message');
-    const correctPassword = '12345'; // !!! НЕ ЗАБУДЬ ПОМЕНЯТЬ ПАРОЛЬ
-
-    if (passwordInput.value === correctPassword) {
-        sessionStorage.setItem('isVerified', 'true');
-        window.location.href = 'valentine.html';
-    } else {
-        errorMessage.textContent = 'Неверный ключ, попробуй еще раз!';
-        passwordInput.value = '';
-    }
+/* --- Общие стили --- */
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background-color: #121212;
+    font-family: 'Lato', sans-serif;
+    color: #f0f0f0;
+    overflow: hidden; /* Скролл по умолчанию отключен */
 }
 
-// --- БЛОК АНАЛИЗА АУДИО ---
-let audioContext, analyser, audioSource, dataArray, bufferLength;
-let animationId = null;
-let currentPulseIntensity = 0;
-let lastBeatTime = 0;
-let energyHistory = [];
-let energyAverage = 0;
-
-function initAudioAnalyzer(audioElement) {
-    if (audioContext) return;
-    try {
-        audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        analyser = audioContext.createAnalyser();
-        audioSource = audioContext.createMediaElementSource(audioElement);
-        audioSource.connect(analyser);
-        analyser.connect(audioContext.destination);
-        analyser.fftSize = 256;
-        bufferLength = analyser.frequencyBinCount;
-        dataArray = new Uint8Array(bufferLength);
-    } catch (error) {
-        console.error("Не удалось инициализировать Web Audio API", error);
-    }
+/* ИЗМЕНЕНО: Стиль для body, когда прокрутка разрешена */
+body.scrollable {
+    overflow-y: auto; /* Включаем вертикальный скролл при необходимости */
+    align-items: flex-start; /* Выравниваем карточку по верху, а не по центру */
+    padding: 5vh 0; /* Добавляем отступы сверху и снизу для удобства */
 }
 
-function analyzeAudioFeatures() {
-    if (!analyser) return { rms: 0, isBeat: false };
-    analyser.getByteFrequencyData(dataArray);
-    let sum = 0;
-    for (let i = 0; i < bufferLength; i++) {
-        sum += dataArray[i] * dataArray[i];
-    }
-    const rms = Math.sqrt(sum / bufferLength) / 255;
-    energyHistory.push(rms);
-    if (energyHistory.length > 30) energyHistory.shift();
-    energyAverage = energyHistory.reduce((a, b) => a + b, 0) / energyHistory.length;
-    let isBeat = false;
-    const currentTime = Date.now();
-    const threshold = energyAverage * 1.2 + 0.08; 
-    if (rms > threshold && (currentTime - lastBeatTime) > 200) {
-        isBeat = true;
-        lastBeatTime = currentTime;
-        currentPulseIntensity = 1.0;
-    }
-    if (currentPulseIntensity > 0) {
-        currentPulseIntensity -= 0.07; 
-    } else {
-        currentPulseIntensity = 0;
-    }
-    return { rms, isBeat };
+/* --- Стили для контейнеров --- */
+.card {
+    background-color: #1E1E1E;
+    padding: 40px 50px;
+    border-radius: 15px;
+    box-shadow: 0 0 30px rgba(220, 20, 60, 0.5);
+    border: 1px solid #333;
+    text-align: center;
+    max-width: 550px;
+    width: 90%;
+    transition: all 0.5s ease-in-out;
+}
+.login-container {
+    background-color: #1E1E1E;
+    padding: 40px 50px;
+    border-radius: 15px;
+    box-shadow: 0 0 30px rgba(220, 20, 60, 0.5);
+    border: 1px solid #333;
+    text-align: center;
+    max-width: 450px;
+    width: 90%;
+}
+.card.lyrics-mode {
+    background-color: transparent;
+    border-color: transparent;
+    box-shadow: none;
 }
 
-function visualize() {
-    const features = analyzeAudioFeatures();
-    const leftGlow = document.querySelector('.left-glow');
-    const rightGlow = document.querySelector('.right-glow');
-    if (leftGlow && rightGlow) {
-        let opacity = 0.4 + features.rms * 1.2;
-        let blur = 10 + features.rms * 40;
-        let spread = 20 + features.rms * 50;
-        if (features.isBeat) {
-            opacity = 1.0;
-            blur = 40 + currentPulseIntensity * 35;
-            spread = 55 + currentPulseIntensity * 45;
-        }
-        const shadowStyle = `0 0 ${blur}px var(--accent-color), 0 0 ${spread}px var(--accent-color)`;
-        leftGlow.style.opacity = opacity;
-        leftGlow.style.boxShadow = shadowStyle;
-        rightGlow.style.opacity = opacity;
-        rightGlow.style.boxShadow = shadowStyle;
-    }
-    animationId = requestAnimationFrame(visualize);
+/* --- Стили для страницы входа (без изменений) --- */
+.login-container h1 { color: #f0f0f0; font-size: 1.8em; margin-bottom: 25px; }
+.notification { background-color: #2b2b2b; border: 1px solid #dc143c; padding: 15px; border-radius: 10px; margin-bottom: 25px; color: #f0f0f0; }
+input[type="password"] { width: 100%; padding: 12px; margin-bottom: 20px; border: 1px solid #555; border-radius: 8px; box-sizing: border-box; font-size: 1em; text-align: center; background-color: #121212; color: #f0f0f0; transition: all 0.3s ease; }
+input[type="password"]:focus { outline: none; border-color: #dc143c; box-shadow: 0 0 10px rgba(220, 20, 60, 0.5); }
+button { padding: 12px 30px; border: none; background-color: #dc143c; color: white; border-radius: 8px; cursor: pointer; font-size: 1em; font-weight: bold; transition: all 0.3s ease; }
+button:hover { background-color: white; color: #dc143c; }
+.error { color: #ff4d4d; margin-top: 15px; height: 20px; font-weight: bold; }
+
+/* --- Стили для основной страницы (без изменений) --- */
+.card img { max-width: 100%; height: auto; border-radius: 15px; margin-bottom: 20px; border: 2px solid #444; transition: opacity 0.5s ease-in-out; }
+#lyrics-container { position: relative; display: flex; justify-content: center; align-items: center; min-height: 250px; }
+.card.lyrics-mode #lyrics-container { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 10; }
+#lyrics { font-family: 'Oswald', sans-serif; font-size: clamp(2.5em, 6vw, 4.5em); font-weight: 700; line-height: 1.2; color: #dc143c; text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 0 15px rgba(220, 20, 60, 0.7); transition: opacity 0.2s ease-in-out; white-space: pre-wrap; text-align: center; position: absolute; opacity: 0; }
+#ghost-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 100%; text-align: center; font-family: 'Oswald', sans-serif; font-size: clamp(6em, 14vw, 15em); font-weight: 700; color: transparent; -webkit-text-stroke: 2px #dc143c; text-shadow: 0 0 10px rgba(220, 20, 60, 0.5); opacity: 0; transition: opacity 0.2s ease-in-out; white-space: nowrap; }
+
+/* --- Стили для письма (без изменений) --- */
+#letter-container { display: none; opacity: 0; transition: opacity 0.5s ease-in-out 0.3s; text-align: left; }
+#letter-container h2 { color: #f0f0f0; text-align: center; margin-bottom: 20px; font-weight: 700; }
+#letter-container p { color: #ccc; line-height: 1.7; font-size: 1.1em; font-weight: 400; }
+#letter-container p::after { content: '▋'; animation: blink 1s step-end infinite; margin-left: 2px; color: #f0f0f0; }
+@keyframes blink { from, to { color: transparent; } 50% { color: #f0f0f0; } }
+#letter-container p.finished-typing::after { content: ''; animation: none; }
+
+/* --- СТИЛИ ДЛЯ БОКОВЫХ НЕОНОВЫХ ЛИНИЙ --- */
+#beat-visualizer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 5;
+    pointer-events: none;
+    display: none;
+    opacity: 0;
+    transition: opacity 0.8s ease-in-out;
 }
 
-// --- КОНЕЦ БЛОКА АНАЛИЗА АУДИО ---
+#beat-visualizer.visible {
+    display: block;
+    opacity: 1;
+}
 
-function startValentine() {
-    const audio = document.getElementById('player');
-    const card = document.querySelector('.card');
-    const image = document.querySelector('.card img');
-    const lyricsContainer = document.getElementById('lyrics-container');
-    const lyricsDisplay = document.getElementById('lyrics');
-    const ghostText = document.getElementById('ghost-text');
-    const letterContainer = document.getElementById('letter-container');
-    const visualizer = document.getElementById('beat-visualizer');
-    const playerContainer = document.getElementById('player-container');
-    const playPauseBtn = document.getElementById('play-pause-btn');
-    const playIcon = document.getElementById('play-icon');
-    const pauseIcon = document.getElementById('pause-icon');
-    const progressBar = document.getElementById('progress-bar');
-    const currentTimeDisplay = document.getElementById('current-time');
-    const totalDurationDisplay = document.getElementById('total-duration');
-    const volumeBtn = document.getElementById('volume-btn');
-    const volumeIcon = document.getElementById('volume-icon');
-    const muteIcon = document.getElementById('mute-icon');
-    const volumeSlider = document.getElementById('volume-slider');
+.edge-glow {
+    position: absolute;
+    --accent-color: #dc143c; 
+    transition: opacity 0.1s ease-out, box-shadow 0.1s ease-out, transform 0.8s cubic-bezier(0.165, 0.84, 0.44, 1);
+    transform: scaleY(0);
+}
 
-    card.classList.add('lyrics-mode');
-    image.style.opacity = 0;
-    image.style.display = 'none';
-    
-    audio.currentTime = 23;
+#beat-visualizer.visible .edge-glow {
+    transform: scaleY(1);
+}
 
-    const events = [
-        { time: 23, type: 'lyric', text: "И я подонок, я изменщик,\nя gaslighter и абьюзер" },
-        { time: 27, type: 'lyric', text: "Я не нравлюсь твоей маме,\nда и хуй с ней" },
-        { time: 30, type: 'ghost', text: "(ну допустим)" },
-        { time: 31, type: 'lyric', text: "Детка, хватит мне уже давать\nпоследний шанс" },
-        { time: 34.5, type: 'ghost', text: "(ага)" },
-        { time: 35, type: 'lyric', text: "Счастье — это не для нас" },
-        { time: 38.5, type: 'showLetter' }
-    ];
+.left-glow {
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(180deg, transparent, var(--accent-color), transparent);
+}
 
-    audio.volume = 0;
-    
-    const playPromise = audio.play();
-    if (playPromise !== undefined) {
-        playPromise.catch(error => {
-            lyricsDisplay.textContent = "Нажми, чтобы начать ♡";
-            document.body.addEventListener('click', () => { 
-                audio.play();
-            }, { once: true });
-        });
-    }
+.right-glow {
+    top: 0;
+    right: 0;
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(180deg, transparent, var(--accent-color), transparent);
+}
 
-    audio.addEventListener('play', () => {
-        initAudioAnalyzer(audio);
-        if (!animationId) {
-            visualize();
-        }
-        updatePlayButton();
-    }, { once: true });
-    
-    audio.addEventListener('pause', updatePlayButton);
+/* --- СТИЛИ ДЛЯ ПЛЕЕРА --- */
+#player-container {
+    display: none;
+    opacity: 0;
+    width: 100%;
+    margin-bottom: 25px;
+    background-color: #2b2b2b;
+    border-radius: 12px;
+    padding: 15px 20px;
+    box-sizing: border-box;
+    border: 1px solid #333;
+    transition: opacity 0.5s ease-in-out 0.3s;
+}
 
-    let fadeInInterval = setInterval(() => {
-        if (audio.volume < 0.7) { 
-            const newVolume = Math.min(0.7, audio.volume + 0.07);
-            audio.volume = newVolume;
-            volumeSlider.value = newVolume;
-        } 
-        else { clearInterval(fadeInInterval); }
-    }, 100);
+.song-info {
+    text-align: center;
+    margin-bottom: 12px;
+}
 
-    let currentEventIndex = 0;
-    audio.addEventListener('timeupdate', function() {
-        updateProgress();
-        if (currentEventIndex >= events.length) return;
-        if (audio.currentTime >= events[currentEventIndex].time) {
-            const currentEvent = events[currentEventIndex];
-            if (currentEvent.type === 'lyric' || currentEvent.type === 'ghost') {
-                lyricsDisplay.style.opacity = 0;
-                ghostText.style.opacity = 0;
-                setTimeout(() => {
-                    if (currentEvent.type === 'lyric') {
-                        lyricsDisplay.innerText = currentEvent.text;
-                        lyricsDisplay.style.opacity = 1;
-                    } else {
-                        ghostText.innerText = currentEvent.text;
-                        ghostText.style.opacity = 1;
-                    }
-                }, 200);
-            }
-            else if (currentEvent.type === 'showLetter') {
-                displayLetter();
-            }
-            currentEventIndex++;
-        }
-    });
+.song-info p {
+    margin: 0;
+    color: #ccc;
+    font-size: 0.85em;
+}
 
-    function formatTime(seconds) {
-        const minutes = Math.floor(seconds / 60);
-        const secs = Math.floor(seconds % 60);
-        return `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
-    }
+.song-info h3 {
+    margin: 4px 0 0 0;
+    color: #f0f0f0;
+    font-size: 1.05em;
+    font-family: 'Oswald', sans-serif;
+    letter-spacing: 1px;
+}
 
-    function updatePlayButton() {
-        if (audio.paused) {
-            playIcon.style.display = 'block';
-            pauseIcon.style.display = 'none';
-        } else {
-            playIcon.style.display = 'none';
-            pauseIcon.style.display = 'block';
-        }
-    }
+.progress-bar-container {
+    width: 100%;
+}
 
-    function updateVolumeIcon() {
-        if (audio.muted || audio.volume === 0) {
-            volumeIcon.style.display = 'none';
-            muteIcon.style.display = 'block';
-        } else {
-            volumeIcon.style.display = 'block';
-            muteIcon.style.display = 'none';
-        }
-    }
+.time-display {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8em;
+    color: #888;
+    margin-top: 5px;
+}
 
-    function updateProgress() {
-        progressBar.value = audio.currentTime;
-        currentTimeDisplay.textContent = formatTime(audio.currentTime);
-        const progressPercent = (audio.duration > 0) ? (audio.currentTime / audio.duration) * 100 : 0;
-        progressBar.style.setProperty('--progress-percent', `${progressPercent}%`);
-    }
+.player-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    margin-top: 10px;
+}
 
-    // ИЗМЕНЕНО: Новая функция для обновления заливки ползунка громкости
-    function updateVolumeSliderFill() {
-        const percent = audio.muted ? 0 : audio.volume * 100;
-        volumeSlider.style.setProperty('--volume-percent', `${percent}%`);
-    }
-    
-    audio.addEventListener('loadedmetadata', () => {
-        progressBar.max = audio.duration;
-        totalDurationDisplay.textContent = formatTime(audio.duration);
-        updateVolumeSliderFill(); // Устанавливаем начальное состояние
-    });
-    
-    playPauseBtn.addEventListener('click', () => {
-        if (audio.paused) {
-            audio.play();
-        } else {
-            audio.pause();
-        }
-    });
-    
-    progressBar.addEventListener('input', () => {
-        audio.currentTime = progressBar.value;
-    });
+.control-btn {
+    background: none;
+    border: none;
+    color: #f0f0f0;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
 
-    volumeSlider.addEventListener('input', () => {
-        audio.muted = false;
-        audio.volume = volumeSlider.value;
-        updateVolumeIcon();
-    });
+.control-btn:hover {
+    background-color: #3a3a3a;
+}
+.control-btn:active {
+    transform: scale(0.9);
+}
 
-    volumeBtn.addEventListener('click', () => {
-        audio.muted = !audio.muted;
-        volumeSlider.value = audio.muted ? 0 : audio.volume;
-        updateVolumeIcon();
-    });
-    
-    audio.addEventListener('volumechange', () => {
-        if (!audio.muted) {
-            volumeSlider.value = audio.volume;
-        }
-        updateVolumeIcon();
-        updateVolumeSliderFill(); // Обновляем заливку при любом изменении громкости
-    });
-    
-    function displayLetter() {
-        lyricsDisplay.style.opacity = 0;
-        ghostText.style.opacity = 0;
-        let volumeInterval = setInterval(() => {
-            if (audio.volume < 1.0) { 
-                const newVolume = Math.min(1.0, audio.volume + 0.05);
-                audio.volume = newVolume;
-                volumeSlider.value = newVolume;
-            } 
-            else { clearInterval(volumeInterval); }
-        }, 50);
+.volume-control {
+    display: flex;
+    align-items: center;
+    position: relative;
+}
 
-        setTimeout(() => {
-            // ИЗМЕНЕНО: Добавляем класс для включения скролла
-            document.body.classList.add('scrollable');
-            
-            lyricsContainer.style.display = 'none';
-            card.classList.remove('lyrics-mode');
-            image.style.display = 'block';
-            playerContainer.style.display = 'block';
-            letterContainer.style.display = 'block';
-            visualizer.classList.add('visible');
-            setTimeout(() => {
-                image.style.opacity = 1;
-                playerContainer.style.opacity = 1;
-                letterContainer.style.opacity = 1;
-                
-                const letterP = letterContainer.querySelector('p');
-                const fullText = `Ты сказала "забить". Я пытался. Не вышло.<br><br>Назвать тебя Спящей Красавицей — ирония, ведь ты вообще не даешь мне спать.<br><br>И хватит себя ругать. Ты даже не представляешь, насколько ты крутая, даже со всеми своими "сложностями". Я вижу твой свет, даже когда ты сама его не замечаешь.<br><br>Понятия не имею, что будет дальше. Знаю только одно: я всё ещё здесь.<br><br><b>Bagerca для Fasil</b>`;
-                letterP.innerHTML = ''; 
-                
-                let i = 0;
-                function typeWriter() {
-                    if (i < fullText.length) {
-                        if (fullText.charAt(i) === '<') {
-                            const closingTagIndex = fullText.indexOf('>', i);
-                            const tag = fullText.substring(i, closingTagIndex + 1);
-                            letterP.innerHTML += tag;
-                            i = closingTagIndex + 1;
-                        } else {
-                            letterP.innerHTML += fullText.charAt(i);
-                            i++;
-                        }
-                        setTimeout(typeWriter, 55); 
-                    } else {
-                        letterP.classList.add('finished-typing');
-                    }
-                }
-                typeWriter();
-            }, 50);
-        }, 300);
-    }
+.volume-control input[type="range"] {
+    display: none; 
+    width: 80px;
+    margin-left: 10px;
+}
+
+.volume-control:hover input[type="range"] {
+    display: block; 
+}
+
+/* --- Кастомные стили для ползунков --- */
+input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 6px;
+    background: #444;
+    border-radius: 5px;
+    outline: none;
+    cursor: pointer;
+}
+
+#progress-bar {
+    --progress-percent: 0%;
+    background: linear-gradient(to right, var(--accent-color) var(--progress-percent), #444 var(--progress-percent));
+}
+
+#volume-slider {
+    --volume-percent: 100%;
+    background: linear-gradient(to right, #f0f0f0 var(--volume-percent), #444 var(--volume-percent));
+}
+
+
+/* Thumb (ползунок) */
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    background: #f0f0f0;
+    border-radius: 50%;
+    border: 2px solid #1E1E1E;
+    box-shadow: 0 0 5px rgba(220, 20, 60, 0.7);
+    transition: transform 0.2s ease;
+    margin-top: -5px;
+}
+input[type="range"]::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    background: #f0f0f0;
+    border-radius: 50%;
+    border: 2px solid #1E1E1E;
+    box-shadow: 0 0 5px rgba(220, 20, 60, 0.7);
+}
+
+input[type="range"]:hover::-webkit-slider-thumb {
+    transform: scale(1.1);
+}
+
+/* НОВЫЙ КОД: Скрытие скроллбара */
+body.scrollable {
+    -ms-overflow-style: none;  /* IE и Edge */
+    scrollbar-width: none;  /* Firefox */
+}
+
+body.scrollable::-webkit-scrollbar {
+    display: none; /* Chrome, Safari и Opera */
 }
