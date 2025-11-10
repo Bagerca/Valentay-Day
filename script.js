@@ -32,30 +32,30 @@ function startValentine() {
     const image = document.querySelector('.card img');
     const lyricsContainer = document.getElementById('lyrics-container');
     const lyricsDisplay = document.getElementById('lyrics');
-    const ghostText = document.getElementById('ghost-text'); // Находим новый элемент
+    const ghostText = document.getElementById('ghost-text');
+    
+    // !!! ИСПРАВЛЕНО: ВОТ ЭТА СТРОКА БЫЛА СЛУЧАЙНО УДАЛЕНА !!!
+    const letterContainer = document.getElementById('letter-container');
 
     card.classList.add('lyrics-mode');
     image.style.opacity = 0;
     image.style.display = 'none';
     audio.currentTime = 23;
 
-    // ИЗМЕНЕНО: Добавляем \n для переноса строк и свойство ghost для "призрачного" текста
     const events = [
         { time: 23, text: "И я подонок, я изменщик,\nя gaslighter и абьюзер", type: 'lyric' },
         { time: 27, text: "Я не нравлюсь твоей маме,\nда и хуй с ней", type: 'lyric', ghost: "(ну допустим)" },
         { time: 31, text: "Детка, хватит мне уже давать\nпоследний шанс", type: 'lyric', ghost: "(ага)"},
         { time: 35, text: "Счастье — это не для нас", type: 'lyric' },
-        { time: 38.5, type: 'showLetter' } // ИЗМЕНЕНО: Ускоряем появление письма
+        { time: 38.5, type: 'showLetter' }
     ];
 
-    // ИЗМЕНЕНО: Логика плавного старта звука
-    audio.volume = 0; // Начинаем с тишины
+    audio.volume = 0;
     audio.play().catch(error => {
         lyricsDisplay.textContent = "Нажми, чтобы начать ♡";
         document.body.addEventListener('click', () => { audio.play(); }, { once: true });
     });
 
-    // Плавно увеличиваем громкость до 70% за 1 секунду
     let fadeInInterval = setInterval(() => {
         if (audio.volume < 0.7) {
             audio.volume = Math.min(0.7, audio.volume + 0.07);
@@ -71,9 +71,9 @@ function startValentine() {
             const currentEvent = events[currentEventIndex];
             if (currentEvent.type === 'lyric') {
                 lyricsDisplay.style.opacity = 0;
-                ghostText.style.opacity = 0; // Прячем "призрак" перед сменой основной строки
+                ghostText.style.opacity = 0;
                 setTimeout(() => {
-                    lyricsDisplay.innerText = currentEvent.text; // innerText правильно обработает \n
+                    lyricsDisplay.innerText = currentEvent.text;
                     lyricsDisplay.style.opacity = 1;
                     if (currentEvent.ghost) {
                         ghostText.innerText = currentEvent.ghost;
@@ -89,7 +89,6 @@ function startValentine() {
     });
 
     function displayLetter() {
-        // ИЗМЕНЕНО: Новая, быстрая и плавная логика перехода
         lyricsContainer.style.opacity = 0;
         ghostText.style.opacity = 0;
 
@@ -102,11 +101,11 @@ function startValentine() {
             lyricsContainer.style.display = 'none';
             card.classList.remove('lyrics-mode');
             image.style.display = 'block';
-            letterContainer.style.display = 'block';
+            letterContainer.style.display = 'block'; // Теперь эта переменная определена
             setTimeout(() => {
                 image.style.opacity = 1;
-                letterContainer.style.opacity = 1;
+                letterContainer.style.opacity = 1; // И здесь тоже
             }, 50);
-        }, 300); // ИЗМЕНЕНО: Уменьшили задержку
+        }, 300);
     }
 }
