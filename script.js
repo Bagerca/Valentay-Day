@@ -45,18 +45,14 @@ function initAudioAnalyzer(audioElement) {
         analyser.fftSize = 256;
         bufferLength = analyser.frequencyBinCount;
         dataArray = new Uint8Array(bufferLength);
-    } catch (error) {
-        console.error("Не удалось инициализировать Web Audio API", error);
-    }
+    } catch (error) { console.error("Не удалось инициализировать Web Audio API", error); }
 }
 
 function analyzeAudioFeatures() {
     if (!analyser) return { rms: 0, isBeat: false };
     analyser.getByteFrequencyData(dataArray);
     let sum = 0;
-    for (let i = 0; i < bufferLength; i++) {
-        sum += dataArray[i] * dataArray[i];
-    }
+    for (let i = 0; i < bufferLength; i++) { sum += dataArray[i] * dataArray[i]; }
     const rms = Math.sqrt(sum / bufferLength) / 255;
     energyHistory.push(rms);
     if (energyHistory.length > 30) energyHistory.shift();
@@ -69,11 +65,7 @@ function analyzeAudioFeatures() {
         lastBeatTime = currentTime;
         currentPulseIntensity = 1.0;
     }
-    if (currentPulseIntensity > 0) {
-        currentPulseIntensity -= 0.07; 
-    } else {
-        currentPulseIntensity = 0;
-    }
+    if (currentPulseIntensity > 0) { currentPulseIntensity -= 0.07; } else { currentPulseIntensity = 0; }
     return { rms, isBeat };
 }
 
@@ -121,6 +113,10 @@ function startValentine() {
     const volumeIcon = document.getElementById('volume-icon');
     const muteIcon = document.getElementById('mute-icon');
     const volumeSlider = document.getElementById('volume-slider');
+    
+    // ИЗМЕНЕНО: Новые ссылки на элементы заливки
+    const progressBarFill = document.getElementById('progress-bar-fill');
+    const volumeSliderFill = document.getElementById('volume-slider-fill');
 
     card.classList.add('lyrics-mode');
     image.style.opacity = 0;
@@ -144,17 +140,13 @@ function startValentine() {
     if (playPromise !== undefined) {
         playPromise.catch(error => {
             lyricsDisplay.textContent = "Нажми, чтобы начать ♡";
-            document.body.addEventListener('click', () => { 
-                audio.play();
-            }, { once: true });
+            document.body.addEventListener('click', () => { audio.play(); }, { once: true });
         });
     }
 
     audio.addEventListener('play', () => {
         initAudioAnalyzer(audio);
-        if (!animationId) {
-            visualize();
-        }
+        if (!animationId) { visualize(); }
         updatePlayButton();
     }, { once: true });
     
@@ -202,50 +194,38 @@ function startValentine() {
     }
 
     function updatePlayButton() {
-        if (audio.paused) {
-            playIcon.style.display = 'block';
-            pauseIcon.style.display = 'none';
-        } else {
-            playIcon.style.display = 'none';
-            pauseIcon.style.display = 'block';
-        }
+        playIcon.style.display = audio.paused ? 'block' : 'none';
+        pauseIcon.style.display = audio.paused ? 'none' : 'block';
     }
 
     function updateVolumeIcon() {
-        if (audio.muted || audio.volume === 0) {
-            volumeIcon.style.display = 'none';
-            muteIcon.style.display = 'block';
-        } else {
-            volumeIcon.style.display = 'block';
-            muteIcon.style.display = 'none';
-        }
+        const isMuted = audio.muted || audio.volume === 0;
+        volumeIcon.style.display = isMuted ? 'none' : 'block';
+        muteIcon.style.display = isMuted ? 'block' : 'none';
     }
 
     function updateProgress() {
         progressBar.value = audio.currentTime;
         currentTimeDisplay.textContent = formatTime(audio.currentTime);
+        // ИЗМЕНЕНО: Обновляем ширину заливки
         const progressPercent = (audio.duration > 0) ? (audio.currentTime / audio.duration) * 100 : 0;
-        progressBar.style.setProperty('--progress-percent', `${progressPercent}%`);
+        progressBarFill.style.width = `${progressPercent}%`;
     }
 
-    // ИЗМЕНЕНО: Новая функция для обновления заливки ползунка громкости
     function updateVolumeSliderFill() {
+        // ИЗМЕНЕНО: Обновляем ширину заливки
         const percent = audio.muted ? 0 : audio.volume * 100;
-        volumeSlider.style.setProperty('--volume-percent', `${percent}%`);
+        volumeSliderFill.style.width = `${percent}%`;
     }
     
     audio.addEventListener('loadedmetadata', () => {
         progressBar.max = audio.duration;
         totalDurationDisplay.textContent = formatTime(audio.duration);
-        updateVolumeSliderFill(); // Устанавливаем начальное состояние
+        updateVolumeSliderFill();
     });
     
     playPauseBtn.addEventListener('click', () => {
-        if (audio.paused) {
-            audio.play();
-        } else {
-            audio.pause();
-        }
+        if (audio.paused) { audio.play(); } else { audio.pause(); }
     });
     
     progressBar.addEventListener('input', () => {
@@ -255,21 +235,17 @@ function startValentine() {
     volumeSlider.addEventListener('input', () => {
         audio.muted = false;
         audio.volume = volumeSlider.value;
-        updateVolumeIcon();
     });
 
     volumeBtn.addEventListener('click', () => {
         audio.muted = !audio.muted;
         volumeSlider.value = audio.muted ? 0 : audio.volume;
-        updateVolumeIcon();
     });
     
     audio.addEventListener('volumechange', () => {
-        if (!audio.muted) {
-            volumeSlider.value = audio.volume;
-        }
+        if (!audio.muted) { volumeSlider.value = audio.volume; }
         updateVolumeIcon();
-        updateVolumeSliderFill(); // Обновляем заливку при любом изменении громкости
+        updateVolumeSliderFill();
     });
     
     function displayLetter() {
@@ -285,9 +261,7 @@ function startValentine() {
         }, 50);
 
         setTimeout(() => {
-            // ИЗМЕНЕНО: Добавляем класс для включения скролла
             document.body.classList.add('scrollable');
-            
             lyricsContainer.style.display = 'none';
             card.classList.remove('lyrics-mode');
             image.style.display = 'block';
