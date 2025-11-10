@@ -3,21 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Вход</title>
+    <title>Для тебя...</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Oswald:wght@700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="login-container">
-        <div class="notification">
-            <p>Привет. Включи звук и приготовься.</p>
+
+    <!-- ЭКРАН ВХОДА -->
+    <div id="login-screen" class="screen">
+        <div class="login-container">
+            <div class="notification">
+                <p>Привет. Включи звук и приготовься.</p>
+            </div>
+            <h1>Введи секретный ключ</h1>
+            <input type="password" id="password" placeholder="••••••••">
+            <button onclick="checkPassword()">Войти</button>
+            <p id="error-message" class="error"></p>
         </div>
-        <h1>Введи секретный ключ</h1>
-        <input type="password" id="password" placeholder="••••••••">
-        <button onclick="checkPassword()">Войти</button>
-        <p id="error-message" class="error"></p>
     </div>
 
-    <!-- Подключаем скрипт -->
+    <!-- ЭКРАН ВАЛЕНТИНКИ (изначально скрыт) -->
+    <div id="valentine-screen" class="screen">
+        <div class="card">
+            <div id="lyrics-container">
+                <h1 id="lyrics">...</h1>
+                <span id="ghost-text"></span>
+            </div>
+
+            <div id="letter-container">
+                <p>
+                    Ты сказала "забить". Я пытался. Не вышло.
+                    <br><br>
+                    Назвать тебя Спящей Красавицей — ирония, ведь ты вообще не даешь мне спать.
+                    <br><br>
+                    И хватит себя ругать. Ты даже не представляешь, насколько ты крутая, даже со всеми своими "сложностями". Я вижу твой свет, даже когда ты сама его не замечаешь.
+                    <br><br>
+                    Понятия не имею, что будет дальше. Знаю только одно: я всё ещё здесь.
+                    <br><br>
+                    <b>Bagerca для Fasil</b>
+                </p>
+            </div>
+            <canvas id="visualizer"></canvas>
+        </div>
+    </div>
+
+    <audio id="player" src="music.mp3"></audio>
     <script src="script.js"></script>
 </body>
 </html>
