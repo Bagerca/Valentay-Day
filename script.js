@@ -1,11 +1,16 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // Этот код определяет, на какой мы странице.
+    // Если есть элемент 'password', значит мы на странице входа.
     if (document.getElementById('password')) {
-        // Логика для страницы входа
+        // Ничего не делаем, так как весь код плеера находится внутри startValentine()
     } 
+    // Если есть элемент 'player', значит мы на главной странице.
     else if (document.getElementById('player')) {
         const isVerified = sessionStorage.getItem('isVerified');
-        if (isVerified !== 'true') { window.location.href = 'index.html'; } 
-        else {
+        if (isVerified !== 'true') { 
+            window.location.href = 'index.html'; 
+        } else {
+            // Запускаем основную функцию ТОЛЬКО на нужной странице
             startValentine();
             sessionStorage.removeItem('isVerified');
         }
@@ -15,7 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
 function checkPassword() {
     const passwordInput = document.getElementById('password');
     const errorMessage = document.getElementById('error-message');
-    const correctPassword = '12345'; // !!! НЕ ЗАБУДЬ ПОМЕНЯТЬ ПАРОЛЬ
+    const correctPassword = '12345';
 
     if (passwordInput.value === correctPassword) {
         sessionStorage.setItem('isVerified', 'true');
@@ -26,7 +31,7 @@ function checkPassword() {
     }
 }
 
-// --- БЛОК АНАЛИЗА АУДИО ---
+// --- БЛОК АНАЛИЗА АУДИО (без изменений) ---
 let audioContext, analyser, audioSource, dataArray, bufferLength;
 let animationId = null;
 let currentPulseIntensity = 0;
@@ -91,9 +96,10 @@ function visualize() {
     animationId = requestAnimationFrame(visualize);
 }
 
-// --- КОНЕЦ БЛОКА АНАЛИЗА АУДИО ---
-
+// --- ОСНОВНАЯ ФУНКЦИЯ ПРОЕКТА ---
 function startValentine() {
+    // Все переменные для элементов плеера находятся ЗДЕСЬ.
+    // Это гарантирует, что скрипт будет искать их только на нужной странице.
     const audio = document.getElementById('player');
     const card = document.querySelector('.card');
     const image = document.querySelector('.card img');
@@ -107,15 +113,13 @@ function startValentine() {
     const playIcon = document.getElementById('play-icon');
     const pauseIcon = document.getElementById('pause-icon');
     const progressBar = document.getElementById('progress-bar');
+    const progressBarFill = document.getElementById('progress-bar-fill');
     const currentTimeDisplay = document.getElementById('current-time');
     const totalDurationDisplay = document.getElementById('total-duration');
     const volumeBtn = document.getElementById('volume-btn');
     const volumeIcon = document.getElementById('volume-icon');
     const muteIcon = document.getElementById('mute-icon');
     const volumeSlider = document.getElementById('volume-slider');
-    
-    // ИЗМЕНЕНО: Новые ссылки на элементы заливки
-    const progressBarFill = document.getElementById('progress-bar-fill');
     const volumeSliderFill = document.getElementById('volume-slider-fill');
 
     card.classList.add('lyrics-mode');
@@ -154,39 +158,11 @@ function startValentine() {
 
     let fadeInInterval = setInterval(() => {
         if (audio.volume < 0.7) { 
-            const newVolume = Math.min(0.7, audio.volume + 0.07);
-            audio.volume = newVolume;
-            volumeSlider.value = newVolume;
-        } 
-        else { clearInterval(fadeInInterval); }
+            audio.volume = Math.min(0.7, audio.volume + 0.07);
+        } else { clearInterval(fadeInInterval); }
     }, 100);
 
-    let currentEventIndex = 0;
-    audio.addEventListener('timeupdate', function() {
-        updateProgress();
-        if (currentEventIndex >= events.length) return;
-        if (audio.currentTime >= events[currentEventIndex].time) {
-            const currentEvent = events[currentEventIndex];
-            if (currentEvent.type === 'lyric' || currentEvent.type === 'ghost') {
-                lyricsDisplay.style.opacity = 0;
-                ghostText.style.opacity = 0;
-                setTimeout(() => {
-                    if (currentEvent.type === 'lyric') {
-                        lyricsDisplay.innerText = currentEvent.text;
-                        lyricsDisplay.style.opacity = 1;
-                    } else {
-                        ghostText.innerText = currentEvent.text;
-                        ghostText.style.opacity = 1;
-                    }
-                }, 200);
-            }
-            else if (currentEvent.type === 'showLetter') {
-                displayLetter();
-            }
-            currentEventIndex++;
-        }
-    });
-
+    // --- Функции управления плеером ---
     function formatTime(seconds) {
         const minutes = Math.floor(seconds / 60);
         const secs = Math.floor(seconds % 60);
@@ -205,22 +181,56 @@ function startValentine() {
     }
 
     function updateProgress() {
-        progressBar.value = audio.currentTime;
+        if (progressBarFill) {
+            const progressPercent = (audio.duration > 0) ? (audio.currentTime / audio.duration) * 100 : 0;
+            progressBarFill.style.width = `${progressPercent}%`;
+            progressBar.value = audio.currentTime;
+        }
         currentTimeDisplay.textContent = formatTime(audio.currentTime);
-        // ИЗМЕНЕНО: Обновляем ширину заливки
-        const progressPercent = (audio.duration > 0) ? (audio.currentTime / audio.duration) * 100 : 0;
-        progressBarFill.style.width = `${progressPercent}%`;
     }
 
     function updateVolumeSliderFill() {
-        // ИЗМЕНЕНО: Обновляем ширину заливки
-        const percent = audio.muted ? 0 : audio.volume * 100;
-        volumeSliderFill.style.width = `${percent}%`;
+        if (volumeSliderFill) {
+            const percent = audio.muted ? 0 : audio.volume * 100;
+            volumeSliderFill.style.width = `${percent}%`;
+            volumeSlider.value = audio.volume;
+        }
     }
-    
+
+    // --- Обработчики событий плеера ---
     audio.addEventListener('loadedmetadata', () => {
         progressBar.max = audio.duration;
         totalDurationDisplay.textContent = formatTime(audio.duration);
+        updateVolumeSliderFill();
+    });
+
+    audio.addEventListener('timeupdate', () => {
+        updateProgress();
+        // Логика смены текста песни
+        if (currentEventIndex >= events.length) return;
+        if (audio.currentTime >= events[currentEventIndex].time) {
+            const currentEvent = events[currentEventIndex];
+            if (currentEvent.type === 'lyric' || currentEvent.type === 'ghost') {
+                lyricsDisplay.style.opacity = 0;
+                ghostText.style.opacity = 0;
+                setTimeout(() => {
+                    if (currentEvent.type === 'lyric') {
+                        lyricsDisplay.innerText = currentEvent.text;
+                        lyricsDisplay.style.opacity = 1;
+                    } else {
+                        ghostText.innerText = currentEvent.text;
+                        ghostText.style.opacity = 1;
+                    }
+                }, 200);
+            } else if (currentEvent.type === 'showLetter') {
+                displayLetter();
+            }
+            currentEventIndex++;
+        }
+    });
+    
+    audio.addEventListener('volumechange', () => {
+        updateVolumeIcon();
         updateVolumeSliderFill();
     });
     
@@ -239,25 +249,17 @@ function startValentine() {
 
     volumeBtn.addEventListener('click', () => {
         audio.muted = !audio.muted;
-        volumeSlider.value = audio.muted ? 0 : audio.volume;
     });
     
-    audio.addEventListener('volumechange', () => {
-        if (!audio.muted) { volumeSlider.value = audio.volume; }
-        updateVolumeIcon();
-        updateVolumeSliderFill();
-    });
-    
+    // --- Финальная сцена с письмом ---
+    let currentEventIndex = 0;
     function displayLetter() {
         lyricsDisplay.style.opacity = 0;
         ghostText.style.opacity = 0;
         let volumeInterval = setInterval(() => {
             if (audio.volume < 1.0) { 
-                const newVolume = Math.min(1.0, audio.volume + 0.05);
-                audio.volume = newVolume;
-                volumeSlider.value = newVolume;
-            } 
-            else { clearInterval(volumeInterval); }
+                audio.volume = Math.min(1.0, audio.volume + 0.05);
+            } else { clearInterval(volumeInterval); }
         }, 50);
 
         setTimeout(() => {
