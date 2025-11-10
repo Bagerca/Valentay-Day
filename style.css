@@ -14,17 +14,15 @@ body {
 /* --- Стили для контейнеров --- */
 .card {
     background-color: #1E1E1E;
-    padding: 40px 20px; /* Уменьшаем боковые отступы, чтобы текст был шире */
+    padding: 40px 50px;
     border-radius: 15px;
     box-shadow: 0 0 30px rgba(220, 20, 60, 0.5);
     border: 1px solid #333;
     text-align: center;
-    max-width: 95%; /* Занимает почти всю ширину */
+    max-width: 550px;
     width: 90%;
     transition: all 0.5s ease-in-out;
 }
-
-/* ИЗМЕНЕНО: Отдельный стиль для окна входа, чтобы оно не было длинным */
 .login-container {
     background-color: #1E1E1E;
     padding: 40px 50px;
@@ -32,17 +30,13 @@ body {
     box-shadow: 0 0 30px rgba(220, 20, 60, 0.5);
     border: 1px solid #333;
     text-align: center;
-    max-width: 450px; /* Возвращаем компактную ширину */
+    max-width: 450px;
     width: 90%;
 }
-
-
-/* Класс, который делает фон невидимым */
 .card.lyrics-mode {
     background-color: transparent;
     border-color: transparent;
     box-shadow: none;
-    padding: 0; /* Убираем все отступы в режиме текста */
 }
 
 /* --- Стили для страницы входа --- */
@@ -55,28 +49,20 @@ button:hover { background-color: white; color: #dc143c; }
 .error { color: #ff4d4d; margin-top: 15px; height: 20px; font-weight: bold; }
 
 /* --- Стили для основной страницы валентинки --- */
-.card img {
-    max-width: 100%;
-    height: auto;
-    border-radius: 15px;
-    margin-bottom: 20px;
-    border: 2px solid #444;
-    transition: opacity 0.5s ease-in-out;
-}
+.card img { max-width: 100%; height: auto; border-radius: 15px; margin-bottom: 20px; border: 2px solid #444; transition: opacity 0.5s ease-in-out; }
 
 #lyrics-container {
     position: relative;
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 100%; /* Гарантирует, что контейнер занимает всю ширину */
     min-height: 250px;
 }
 
 #lyrics {
     font-family: 'Oswald', sans-serif;
-    /* ИЗМЕНЕНО: Адаптивный размер шрифта, зависящий от ширины экрана */
-    font-size: 9vw; 
+    /* ИЗМЕНЕНО: Возвращаем фиксированный, но крупный размер */
+    font-size: 3.5em; 
     font-weight: 700;
     line-height: 1.2;
     color: #dc143c;
@@ -84,11 +70,10 @@ button:hover { background-color: white; color: #dc143c; }
     letter-spacing: 2px;
     text-shadow: 0 0 15px rgba(220, 20, 60, 0.7);
     transition: opacity 0.2s ease-in-out;
-    white-space: pre-wrap;
-    position: relative;
-    z-index: 2;
-    width: 100%; /* ИЗМЕНЕНО: Добавлено для идеального центрирования */
-    text-align: center; /* ИЗМЕНЕНО: Добавлено для идеального центрирования */
+    white-space: pre-wrap; /* Это позволяет \n делать переносы */
+    text-align: center;
+    position: absolute; /* Позволяет тексту исчезать, не влияя на "призрак" */
+    opacity: 0; /* Изначально невидим */
 }
 
 #ghost-text {
@@ -96,11 +81,10 @@ button:hover { background-color: white; color: #dc143c; }
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    z-index: 1;
-    width: 100%; /* Растягиваем на всю ширину */
-    text-align: center; /* Центрируем текст внутри */
+    width: 100%;
+    text-align: center;
     font-family: 'Oswald', sans-serif;
-    /* ИЗМЕНЕНО: Огромный адаптивный шрифт */
+    /* ИЗМЕНЕНО: Огромный адаптивный шрифт ТОЛЬКО для этого текста */
     font-size: 14vw; 
     font-weight: 700;
     color: #121212;
@@ -110,11 +94,6 @@ button:hover { background-color: white; color: #dc143c; }
 }
 
 /* --- Стили для письма --- */
-#letter-container {
-    display: none;
-    opacity: 0;
-    transition: opacity 0.5s ease-in-out 0.3s;
-    text-align: left;
-}
+#letter-container { display: none; opacity: 0; transition: opacity 0.5s ease-in-out 0.3s; text-align: left; }
 #letter-container h2 { color: #f0f0f0; text-align: center; margin-bottom: 20px; font-weight: 700; }
 #letter-container p { color: #ccc; line-height: 1.7; font-size: 1.1em; font-weight: 400; }
