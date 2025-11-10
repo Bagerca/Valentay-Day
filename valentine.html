@@ -1,43 +1,143 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Для тебя...</title>
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Oswald:wght@700&display=swap" rel="stylesheet">
+/* --- Общие стили --- */
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background-color: #121212;
+    font-family: 'Lato', sans-serif;
+    color: #f0f0f0;
+    overflow: hidden;
+}
 
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <div class="card">
-        <img src="https://media.tenor.com/E28vIanjT5cAAAAi/love-you.gif" alt="valentine-gif">
-        
-        <!-- ИЗМЕНЕНО: Немного изменили структуру для "призрачного" текста -->
-        <div id="lyrics-container">
-            <h1 id="lyrics">...</h1>
-            <span id="ghost-text"></span>
-        </div>
+/* --- Стили для контейнеров --- */
+.card {
+    background-color: #1E1E1E;
+    padding: 40px 50px;
+    border-radius: 15px;
+    box-shadow: 0 0 30px rgba(220, 20, 60, 0.5);
+    border: 1px solid #333;
+    text-align: center;
+    max-width: 550px;
+    width: 90%;
+    transition: all 0.5s ease-in-out;
+}
+.login-container {
+    background-color: #1E1E1E;
+    padding: 40px 50px;
+    border-radius: 15px;
+    box-shadow: 0 0 30px rgba(220, 20, 60, 0.5);
+    border: 1px solid #333;
+    text-align: center;
+    max-width: 450px;
+    width: 90%;
+}
+.card.lyrics-mode {
+    background-color: transparent;
+    border-color: transparent;
+    box-shadow: none;
+}
 
-        <div id="letter-container">
-            <h2>А теперь серьезно...</h2>
-            <p>
-               <!-- СКОПИРОВАННЫЙ ТЕКСТ ВСТАВЛЯЕТСЯ СЮДА -->
-        Ты сказала "забить". Я пытался. Не вышло.
-        <br><br>
-        Назвать тебя Спящей Красавицей — ирония, ведь ты вообще не даешь мне спать.
-        <br><br>
-        И хватит себя ругать. Ты даже не представляешь, насколько ты крутая, даже со всеми своими "сложностями". Я вижу твой свет, даже когда ты сама его не замечаешь.
-        <br><br>
-        Понятия не имею, что будет дальше. Знаю только одно: я всё ещё здесь.
-        <br><br>
-        <b>Bagerca для Fasil</b>
-    </p>
-</div>
+/* --- НОВОЕ: Анимация пульсации для визуализатора --- */
+@keyframes pulseGlow {
+    0%, 100% {
+        box-shadow: 0 0 30px rgba(220, 20, 60, 0.5);
+    }
+    50% {
+        box-shadow: 0 0 55px rgba(220, 20, 60, 0.85);
+    }
+}
 
-    <audio id="player" src="music.mp3"></audio>
-    <script src="script.js"></script>
-</body>
-</html>
+.card.pulsing {
+    animation: pulseGlow 1.6s infinite ease-in-out;
+}
+
+
+/* --- Стили для страницы входа --- */
+.login-container h1 { color: #f0f0f0; font-size: 1.8em; margin-bottom: 25px; }
+.notification { background-color: #2b2b2b; border: 1px solid #dc143c; padding: 15px; border-radius: 10px; margin-bottom: 25px; color: #f0f0f0; }
+input[type="password"] { width: 100%; padding: 12px; margin-bottom: 20px; border: 1px solid #555; border-radius: 8px; box-sizing: border-box; font-size: 1em; text-align: center; background-color: #121212; color: #f0f0f0; transition: all 0.3s ease; }
+input[type="password"]:focus { outline: none; border-color: #dc143c; box-shadow: 0 0 10px rgba(220, 20, 60, 0.5); }
+button { padding: 12px 30px; border: none; background-color: #dc143c; color: white; border-radius: 8px; cursor: pointer; font-size: 1em; font-weight: bold; transition: all 0.3s ease; }
+button:hover { background-color: white; color: #dc143c; }
+.error { color: #ff4d4d; margin-top: 15px; height: 20px; font-weight: bold; }
+
+/* --- Стили для основной страницы валентинки --- */
+.card img { max-width: 100%; height: auto; border-radius: 15px; margin-bottom: 20px; border: 2px solid #444; transition: opacity 0.5s ease-in-out; }
+
+#lyrics-container {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 250px;
+}
+
+.card.lyrics-mode #lyrics-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 10;
+}
+
+#lyrics {
+    font-family: 'Oswald', sans-serif;
+    font-size: clamp(2.5em, 6vw, 4.5em);
+    font-weight: 700;
+    line-height: 1.2;
+    color: #dc143c;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    text-shadow: 0 0 15px rgba(220, 20, 60, 0.7);
+    transition: opacity 0.2s ease-in-out;
+    white-space: pre-wrap;
+    text-align: center;
+    position: absolute;
+    opacity: 0;
+}
+
+#ghost-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    text-align: center;
+    font-family: 'Oswald', sans-serif;
+    font-size: clamp(6em, 14vw, 15em);
+    font-weight: 700;
+    color: transparent;
+    -webkit-text-stroke: 2px #dc143c;
+    text-shadow: 0 0 10px rgba(220, 20, 60, 0.5);
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+    white-space: nowrap;
+}
+
+/* --- Стили для письма --- */
+#letter-container { display: none; opacity: 0; transition: opacity 0.5s ease-in-out 0.3s; text-align: left; }
+#letter-container h2 { color: #f0f0f0; text-align: center; margin-bottom: 20px; font-weight: 700; }
+#letter-container p { color: #ccc; line-height: 1.7; font-size: 1.1em; font-weight: 400; }
+
+/* --- НОВОЕ: Стили для эффекта печатной машинки --- */
+#letter-container p::after {
+    content: '▋';
+    animation: blink 1s step-end infinite;
+    margin-left: 2px;
+    color: #f0f0f0;
+}
+
+@keyframes blink {
+    from, to { color: transparent; }
+    50% { color: #f0f0f0; }
+}
+
+#letter-container p.finished-typing::after {
+    content: '';
+    animation: none;
+}
+
+Теперь, когда анимация с текстом песни закончится, начнется плавное появление письма с эффектом печати, а во время самой песни фон будет мягко пульсировать в такт музыке.
