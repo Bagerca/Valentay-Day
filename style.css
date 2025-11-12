@@ -90,7 +90,7 @@ button:hover { background-color: white; color: #dc143c; }
 .control-btn:active { transform: scale(0.9); }
 .volume-control { display: flex; align-items: center; position: relative; }
 
-/* --- СТИЛИ ДЛЯ ПОЛЗУНКОВ --- */
+/* ИЗМЕНЕНО: Стили для новой структуры ползунков */
 .slider-wrapper {
     position: relative;
     width: 100%;
@@ -173,68 +173,4 @@ button:hover { background-color: white; color: #dc143c; }
 
 .slider-input:hover::-webkit-slider-thumb {
     transform: scale(1.1);
-}
-
-/* --- МОБИЛЬНАЯ ВЕРСИЯ --- */
-@media (max-width: 600px) {
-
-  /* Убираем карточку, делаем фон цельным */
-  .card {
-    background: transparent;
-    box-shadow: none;
-    border: none;
-    padding: 0;
-    max-width: 100%;
-  }
-
-  /* Лирика — чтобы не вылезала за экран */
-  #lyrics {
-    font-size: clamp(1.5em, 8vw, 2.8em);
-    line-height: 1.1;
-    padding: 0 10px;
-    word-break: break-word;
-    white-space: normal;
-  }
-
-  #ghost-text {
-    font-size: clamp(3em, 12vw, 8em);
-    -webkit-text-stroke: 1px #dc143c;
-    word-break: break-word;
-    white-space: normal;
-    max-width: 90%;
-  }
-
-  /* Письмо — без рамки и подложки */
-  #letter-container {
-    background: none;
-    border: none;
-    box-shadow: none;
-    padding: 0 15px;
-  }
-
-  /* Плеер — минималистичный */
-  #player-container {
-    background: none;
-    border: none;
-    box-shadow: none;
-    padding: 10px 0;
-  }
-
-  .song-info h3 {
-    font-size: 0.9em;
-  }
-
-  .player-controls {
-    gap: 10px;
-  }
-
-  /* Отключаем неоновые линии для мобильных */
-  #beat-visualizer {
-    display: none !important;
-  }
-
-  /* Отступы при прокрутке письма */
-  body.scrollable {
-    padding: 8vh 0;
-  }
 }
